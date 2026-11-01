@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="es">
+<head>
+<title>Descubriendo Santa Rosa</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Guía interactiva de Santa Rosa de Calamuchita, Córdoba: qué hacer, historia, mapa en vivo, hospedajes, presupuesto y más.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/icono.png">
+<meta name="theme-color" content="#FFFFFF">
+<meta property="og:title" content="Descubriendo Santa Rosa">
+<meta property="og:description" content="Guía interactiva de Santa Rosa de Calamuchita: qué hacer, mapa en vivo, agenda, dónde dormir y comer.">
+<meta property="og:image" content="img/fondo.jpg">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Nunito:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Layout: postal con la ilustración + buscador + accesos directos (1 toque) → lugares → escapadas → preguntas.
+   Barra inferior fija en el celular. Colores del isologo de Santa Rosa: turquesa, naranja, amarillo, lima y negro. */
+:root{
+  /* Tema único claro: blanco hueso para que destaquen los botones */
+  --papel:#FAF8F3; --papel-2:#F2EDE3; --tarjeta:#FFFFFF; --borde:#E6DED0;
+  --tinta:#1D1D1B; --tinta-suave:#57534C;
+  --turquesa:#0098A9; --turquesa-cl:#3AAFB9; --turquesa-txt:#00788A;
+  --naranja:#FF7300; --amarillo:#FF9E1B; --lima:#93C01F; --lima-cl:#B8D435;
+  --boton-turq:#00798A; --sombra:rgba(60,40,10,.12);
+  --franja:linear-gradient(90deg,#FF7300 0 25%,#FF9E1B 25% 50%,#B8D435 50% 75%,#3AAFB9 75% 100%);
+  --display:"Montserrat","Segoe UI",Arial,sans-serif;
+  --texto:"Nunito","Segoe UI",system-ui,sans-serif;
+  --mano:"Caveat","Comic Sans MS",cursive;
+  --fondo:url("img/fondo.jpg");
+  --escala:1;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+html{font-size:calc(17px * var(--escala));scroll-behavior:smooth}
+body{background:var(--papel);color:var(--tinta);font-family:var(--texto);line-height:1.55;margin:0;overflow-x:hidden}
+h1,h2,h3{font-family:var(--display);line-height:1.12;text-wrap:balance;margin:0;letter-spacing:-.01em}
+a{color:var(--turquesa-txt)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--amarillo);outline-offset:3px;border-radius:8px}
+.envoltura{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mano{font-family:var(--mano);font-weight:700}
+.franja{height:6px;background:var(--franja)}
+html:not(.js) .solo-js{display:none!important}
+html.js .solo-sin-js{display:none!important}
+
+/* Logo: en la barra va la versión de letras negras */
+.marca .logo-oscuro{display:none}
+
+/* ---------- Barra superior ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#fff}
+.barra{position:sticky;top:env(safe-area-inset-top,0px);z-index:900;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);box-shadow:0 2px 14px rgba(0,0,0,.06)}
+.barra .envoltura{display:flex;align-items:center;gap:10px;padding-block:10px}
+.marca{display:flex;align-items:center;margin-right:auto;min-width:0}
+.marca img{height:42px;width:auto;display:block}
+.nav{display:flex;gap:2px}
+.nav a{color:var(--tinta);font-weight:800;padding:8px 12px;border-radius:999px;text-decoration:none;font-size:.92rem}
+.nav a:hover,.nav a[aria-current="page"]{background:var(--papel-2)}
+.btn-mini{text-decoration:none;border:1.5px solid var(--borde);background:var(--tarjeta);color:var(--tinta);border-radius:999px;padding:8px 13px;font-weight:800;font-size:.85rem;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-mini svg{width:18px;height:18px}
+.btn-mini:hover{border-color:var(--turquesa)}
+@media (max-width:980px){.nav{display:none}}
+@media (max-width:520px){.marca img{height:34px}#txtEsc,#btnBuscar span{display:none}.barra .envoltura{gap:6px}}
+
+/* ---------- Botones ---------- */
+.btn{border:0;background:var(--naranja);color:#1D1D1B;border-radius:999px 999px 999px 6px;padding:13px 22px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.2}
+.btn:hover{filter:brightness(1.06)}
+.btn.sec{background:var(--papel-2);color:var(--tinta)}
+.btn.turq{background:var(--boton-turq);color:#fff}
+.btn svg{width:20px;height:20px;flex:none}
+.pill{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--papel-2);color:var(--tinta-suave);align-self:flex-start}
+.titulo-sec{display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.titulo-sec h2{font-size:clamp(1.6rem,3.6vw,2.4rem);font-weight:900}
+.titulo-sec .mano{font-size:1.5rem;color:var(--turquesa-txt);display:block;line-height:1}
+.enlace{border:0;background:none;color:var(--turquesa-txt);font-weight:800;display:inline-flex;align-items:center;gap:6px;padding:6px 0;text-decoration:none}
+.enlace svg{width:18px;height:18px}
+.nota{font-size:.88rem;color:var(--tinta-suave)}
+.recorte{background-image:var(--fondo);background-size:320%;background-repeat:no-repeat;background-color:var(--papel-2)}
+
+/* ---------- HERO: banner a todo el ancho con la ilustración ---------- */
+.hero{position:relative;min-height:min(80vh,660px);display:grid;align-items:center;overflow:hidden;color:#fff;text-align:center;background:#1D1D1B}
+.hero-fondo{position:absolute;inset:0;background:var(--fondo) center 42%/cover no-repeat}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,18,20,.30) 0%,rgba(12,18,20,.50) 50%,rgba(12,18,20,.72) 100%)}
+.hero-contenido{position:relative;z-index:1;display:grid;justify-items:center;gap:8px;padding-block:64px 128px}
+.hero .bienvenida{font-family:var(--display);font-weight:700;font-size:clamp(1.15rem,2.4vw,1.6rem);text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.hero h1{font-size:clamp(2.6rem,7.2vw,5.4rem);font-weight:900;line-height:.98;color:#fff;text-shadow:0 4px 28px rgba(0,0,0,.45);max-width:14ch}
+.hero .linea-hero{width:min(360px,60%);height:5px;border-radius:3px;background:var(--franja);margin:14px 0 6px}
+.hero .lema{font-family:var(--display);font-weight:700;font-size:clamp(1.1rem,2.6vw,1.6rem);color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.credito{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:84px;z-index:1;font-family:var(--mano);font-size:1.1rem;color:rgba(255,255,255,.85)}
+.accesos-wrap{position:relative;z-index:2;margin-top:-72px}
+@media (max-width:760px){
+  .hero{min-height:560px}
+  .hero-fondo{background-position:50% 40%}
+  .hero-contenido{padding-block:44px 118px}
+  .credito{bottom:80px}
+}
+
+/* Buscador */
+.buscador{position:relative;margin-top:22px;width:min(560px,100%);text-align:left}
+.buscador label{display:block;font-weight:800;margin-bottom:8px;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.45)}
+.buscador .campo-b{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #fff;border-radius:999px;padding:6px 6px 6px 18px;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.buscador .campo-b:focus-within{border-color:var(--turquesa)}
+.buscador svg{width:22px;height:22px;color:var(--tinta-suave);flex:none}
+.buscador input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:1.05rem;color:var(--tinta);padding:10px 0;outline:none}
+.resultados{color:var(--tinta);text-align:left;position:absolute;left:0;right:0;top:calc(100% + 8px);background:var(--tarjeta);border:1px solid var(--borde);border-radius:20px;box-shadow:0 20px 44px var(--sombra);padding:8px;margin:0;list-style:none;z-index:50;max-height:60vh;overflow:auto}
+.resultados button{width:100%;display:flex;gap:12px;align-items:center;text-align:left;background:none;border:0;border-radius:14px;padding:10px 12px;color:var(--tinta)}
+.resultados button:hover,.resultados button:focus-visible{background:var(--papel-2)}
+.resultados b{display:block;font-weight:800}
+.resultados small{color:var(--tinta-suave)}
+.resultados .tipo{flex:none;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:4px 8px;border-radius:999px;background:var(--papel-2);color:var(--turquesa-txt)}
+.sugerencias{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px;font-size:.92rem;color:#fff;align-items:center;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.sugerencias button{border:0;background:rgba(255,255,255,.18);color:#fff;font-weight:800;padding:4px 12px;border-radius:999px;backdrop-filter:blur(4px)}
+.sugerencias button:hover{background:rgba(255,255,255,.32)}
+
+/* Accesos directos */
+.accesos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:4px}
+.acceso{display:flex;gap:12px;align-items:center;text-align:left;background:var(--tarjeta);box-shadow:0 12px 30px rgba(0,0,0,.10);border:1.5px solid var(--borde);border-radius:20px;padding:14px;color:var(--tinta);text-decoration:none;min-width:0;transition:transform .2s,border-color .2s}
+.acceso:hover{transform:translateY(-3px);border-color:var(--c)}
+.acceso .ic{flex:none;width:48px;height:48px;display:grid;place-items:center;border-radius:999px 999px 999px 6px;background:var(--c);color:#fff}
+.acceso .ic svg{width:24px;height:24px}
+.acceso b{display:block;font-family:var(--display);font-size:.98rem;line-height:1.2}
+.acceso span{font-size:.84rem;color:var(--tinta-suave);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.accesos{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.acceso{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}.acceso .ic{width:42px;height:42px}}
+
+/* Intereses */
+.intereses{display:flex;flex-wrap:wrap;gap:10px}
+.interes{flex:none;display:flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:10px 18px 10px 10px;font-weight:800;color:#1D1D1B;background:var(--c);text-decoration:none}
+.interes .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.55)}
+.interes .ic svg{width:20px;height:20px}
+
+/* Secciones del inicio */
+.bloque{padding-block:48px}
+.bloque-papel{background:var(--papel-2)}
+.lugares{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.lugar{background:var(--tarjeta);border:1px solid var(--borde);border-radius:24px 24px 24px 6px;overflow:hidden;display:flex;flex-direction:column;color:var(--tinta)}
+.lugar .recorte{aspect-ratio:4/3;max-width:100%;position:relative}
+.lugar .recorte .pill{position:absolute;left:12px;top:12px;background:#fff;color:#1D1D1B}
+.lugar-cuerpo{padding:14px 16px 16px;display:grid;gap:6px;flex:1}
+.lugar h3{font-size:1.1rem}
+.lugar p{margin:0;font-size:.9rem;color:var(--tinta-suave)}
+.lugar .acciones{display:flex;gap:8px;margin-top:auto;padding-top:6px}
+.lugar .acciones>*{flex:1;padding:10px 12px;font-size:.88rem}
+@media (max-width:1000px){.lugares{grid-template-columns:1fr 1fr}}
+@media (max-width:540px){.lugares{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;margin-right:calc(-1 * max(16px,env(safe-area-inset-right,0px)))}.lugar{flex:0 0 78%;scroll-snap-align:start}}
+
+.planes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.plan{background:var(--tarjeta);border:1px solid var(--borde);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.plan::before{content:"";position:absolute;inset:0 0 auto;height:6px;background:var(--c)}
+.plan.top{border:2px solid var(--naranja);box-shadow:0 14px 34px var(--sombra)}
+.plan .cinta{align-self:flex-start;background:var(--naranja);color:#1D1D1B;font-weight:900;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.plan h3{font-size:1.35rem}
+.plan .precio{font-family:var(--display);font-weight:900;font-size:1.9rem;font-variant-numeric:tabular-nums;line-height:1}
+.plan .precio small{display:block;font-family:var(--texto);font-weight:700;font-size:.8rem;color:var(--tinta-suave);margin-top:4px}
+.plan ul{list-style:none;padding:0;margin:4px 0 8px;display:grid;gap:7px}
+.plan li{display:flex;gap:8px;font-size:.94rem}
+.plan li::before{content:"";flex:none;width:9px;height:9px;margin-top:8px;border-radius:999px 999px 999px 0;background:var(--c)}
+.plan .btn{margin-top:auto}
+@media (max-width:860px){.planes{grid-template-columns:1fr}}
+
+.preguntas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.pregunta{display:flex;gap:14px;align-items:center;text-align:left;background:var(--tarjeta);border:1.5px solid var(--borde);border-radius:18px;padding:14px 16px;color:var(--tinta);text-decoration:none;transition:border-color .2s,transform .2s}
+.pregunta:hover{border-color:var(--c);transform:translateX(3px)}
+.pregunta .ic{width:46px;height:46px;flex:none;border-radius:999px 999px 999px 6px;display:grid;place-items:center;background:var(--c);color:#fff}
+.pregunta .ic svg{width:24px;height:24px}
+.pregunta b{font-family:var(--display);font-size:.98rem;line-height:1.25}
+.pregunta .fl{margin-left:auto;color:var(--tinta-suave);flex:none}
+.pregunta .fl svg{width:20px;height:20px}
+@media (max-width:900px){.preguntas{grid-template-columns:1fr 1fr}}
+@media (max-width:580px){.preguntas{grid-template-columns:1fr}}
+
+.datos-res{display:grid;grid-template-columns:1.3fr 1fr;border-radius:28px;overflow:hidden;background:#1D1D1B;color:#fff}
+.datos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:28px 18px;align-items:center}
+.dato{text-align:center;padding:0 6px;border-right:1px solid rgba(255,255,255,.18);min-width:0}
+.dato:last-child{border-right:0}
+.dato b{display:block;font-family:var(--display);font-weight:900;font-size:clamp(1.7rem,3.2vw,2.4rem);font-variant-numeric:tabular-nums;line-height:1}
+.dato:nth-child(1) b{color:#3AAFB9}.dato:nth-child(2) b{color:#FF9E1B}.dato:nth-child(3) b{color:#B8D435}.dato:nth-child(4) b{color:#FF7300}
+.dato span{font-size:.84rem;opacity:.85}
+.residente-cta{display:grid;gap:8px;align-content:center;padding:26px;background:#00798A;color:#fff;text-decoration:none;border:0;text-align:left}
+.residente-cta .mano{font-size:1.5rem;color:#FFE08A;line-height:1}
+.residente-cta b{font-family:var(--display);font-size:1.15rem;line-height:1.25}
+.residente-cta .play{width:50px;height:50px;border-radius:50%;background:#FF9E1B;color:#1D1D1B;display:grid;place-items:center}
+.residente-cta .play svg{width:22px;height:22px}
+@media (max-width:860px){.datos-res{grid-template-columns:1fr}.datos{grid-template-columns:1fr 1fr;row-gap:22px}.dato:nth-child(2){border-right:0}}
+
+/* ---------- Vistas internas ---------- */
+.banda{height:130px;background:var(--fondo) center 40%/cover no-repeat;position:relative}
+.banda::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,transparent 20%,var(--papel))}
+.vista{padding-block:0 56px;margin-top:-46px;position:relative}
+.migas{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.vista-cab{display:grid;gap:8px;margin-bottom:22px}
+.vista-cab h1{font-size:clamp(1.8rem,4.6vw,2.8rem);font-weight:900}
+.vista-cab p{font-size:1.08rem;color:var(--tinta-suave);max-width:62ch;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.chip{border:2px solid var(--borde);background:var(--tarjeta);color:var(--tinta);border-radius:999px;padding:8px 16px;font-weight:800;text-decoration:none}
+.chip[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.grilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{background:var(--tarjeta);border:1px solid var(--borde);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h3{font-size:1.1rem}
+.card p{margin:0;color:var(--tinta-suave)}
+.card .acciones{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;padding-top:6px}
+.card .acciones .btn{padding:10px 16px;font-size:.92rem}
+.foto{aspect-ratio:16/10;max-width:100%;border-radius:14px;border:2px dashed var(--borde);display:grid;place-items:center;color:var(--tinta-suave);font-size:.85rem;text-align:center;padding:10px;background:var(--papel-2)}
+.subtitulo{font-size:1.4rem;font-weight:900;margin:34px 0 14px;display:flex;align-items:center;gap:10px}
+.subtitulo::before{content:"";flex:none;width:22px;height:6px;border-radius:3px;background:var(--franja)}
+.seguir{margin-top:40px;padding-top:24px;border-top:2px dashed var(--borde)}
+.seguir .preguntas{margin-top:12px}
+
+/* Clima */
+.clima{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--tarjeta);border:1px solid var(--borde);border-radius:20px;padding:14px 18px;max-width:600px}
+.clima .temp{font-family:var(--display);font-size:2.2rem;font-weight:900;font-variant-numeric:tabular-nums}
+.clima .det{font-size:.9rem;color:var(--tinta-suave)}
+.clima .dias{display:flex;gap:12px;margin-left:auto}
+.clima .dia{text-align:center;font-size:.8rem;font-variant-numeric:tabular-nums}
+.clima .dia b{display:block;font-size:1.2rem}
+
+/* Mapa */
+.mapa-caja{position:relative;border-radius:22px;overflow:hidden;border:2px solid var(--borde);background:var(--papel-2)}
+#mapa{height:min(60vh,520px);width:100%}
+.mapa-ctrl{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.mapa-aviso{padding:30px;text-align:center;color:var(--tinta-suave)}
+.mapa-aviso a{font-weight:800}
+.leaflet-popup-content{font-family:var(--texto);font-size:.95rem}
+.leaflet-popup-content b{font-family:var(--display);font-size:1rem}
+.pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.pin span{transform:rotate(45deg);font-size:13px;font-weight:900;color:#1D1D1B}
+.yo{width:18px;height:18px;border-radius:50%;background:#2B7FFF;border:3px solid #fff;box-shadow:0 0 0 6px rgba(43,127,255,.25)}
+
+/* Historia: línea de tiempo vertical, todo visible */
+.linea{list-style:none;margin:0;padding:0;position:relative;max-width:820px}
+.linea::before{content:"";position:absolute;left:58px;top:6px;bottom:6px;width:4px;border-radius:2px;background:linear-gradient(var(--naranja),var(--amarillo),var(--lima-cl),var(--turquesa-cl))}
+.hito{display:grid;grid-template-columns:48px 1fr;gap:28px;padding:10px 0}
+.hito .anio{font-family:var(--display);font-weight:900;font-size:.95rem;text-align:right;padding-top:16px;font-variant-numeric:tabular-nums}
+.hito .caja{position:relative;background:var(--tarjeta);border:1px solid var(--borde);border-radius:18px;padding:14px 18px}
+.hito .caja::before{content:"";position:absolute;left:-26px;top:18px;width:16px;height:16px;border-radius:50%;background:var(--papel);border:4px solid var(--c,var(--turquesa))}
+.hito h3{font-size:1.08rem;margin-bottom:4px}
+.hito p{margin:0;color:var(--tinta-suave)}
+.nombre-origen{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;max-width:620px}
+.nombre-origen div{background:var(--tarjeta);border:1px solid var(--borde);border-radius:16px;padding:14px;text-align:center}
+.nombre-origen b{display:block;font-family:var(--display);font-size:1.4rem;color:var(--turquesa-txt)}
+
+/* Calculadora */
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.campo{display:grid;gap:6px;margin-bottom:14px}
+.campo label{font-weight:800}
+.rango{display:flex;align-items:center;gap:12px}
+.rango input{flex:1;accent-color:var(--naranja)}
+.rango output{font-weight:900;min-width:2.5ch;font-variant-numeric:tabular-nums}
+.segmentos{display:flex;flex-wrap:wrap;gap:6px}
+.total{background:#1D1D1B;color:#FFFBF4;border-radius:22px;padding:22px;align-self:start}
+.total .num{font-family:var(--display);font-size:clamp(2rem,6vw,2.8rem);font-weight:900;font-variant-numeric:tabular-nums;color:#FF9E1B}
+.total table{width:100%;border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums}
+.total td{padding:7px 0;border-bottom:1px solid rgba(255,255,255,.15)}
+.total td:last-child{text-align:right}
+.total .nota{color:rgba(255,251,244,.72)}
+
+/* Quiz */
+.quiz{max-width:680px;background:var(--tarjeta);border:1px solid var(--borde);border-radius:24px;padding:24px}
+.barra-prog{height:10px;background:var(--papel-2);border-radius:999px;overflow:hidden;margin-bottom:18px}
+.barra-prog i{display:block;height:100%;background:var(--franja);transition:width .3s}
+.opciones{display:grid;gap:10px;margin-top:16px}
+.opcion{border:2px solid var(--borde);background:var(--papel);color:var(--tinta);border-radius:16px;padding:14px 16px;text-align:left;font-weight:800;text-decoration:none}
+.opcion:hover{border-color:var(--turquesa)}
+.medidor{display:flex;height:44px;border-radius:999px;overflow:hidden;margin:16px 0;font-weight:900;color:#1D1D1B;font-size:.9rem}
+.medidor div{display:grid;place-items:center;transition:width .5s;min-width:0;overflow:hidden;white-space:nowrap}
+
+.check{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--borde)}
+.check input{width:22px;height:22px;accent-color:var(--lima);flex:none;margin-top:2px}
+.check input:checked + span{text-decoration:line-through;color:var(--tinta-suave)}
+
+.contacto-num{font-family:var(--display);font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums;user-select:all;word-break:break-word}
+.qr{background:#fff;padding:10px;border-radius:12px;align-self:flex-start}
+.qr img,.qr canvas{display:block;width:116px!important;height:116px!important}
+
+/* Puntajes y agenda */
+.puntaje{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--tinta-suave);flex-wrap:wrap}
+.puntaje b{color:var(--tinta);font-family:var(--display);font-size:1rem}
+.puntaje .estrella{color:#FF9E1B}
+.precio-nivel{font-weight:900;color:var(--tinta);letter-spacing:.04em}
+.agenda{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.evento{background:var(--tarjeta);border:1px solid var(--borde);border-radius:20px;padding:16px 16px 16px 22px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.evento::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--c)}
+.evento .cuando{font-family:var(--mano);font-size:1.35rem;color:var(--turquesa-txt);line-height:1}
+.evento h3{font-size:1.05rem}
+.evento p{margin:0;font-size:.9rem;color:var(--tinta-suave)}
+.evento .donde{font-size:.82rem;font-weight:800;color:var(--tinta);margin-top:auto}
+@media (max-width:900px){.agenda{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.agenda{grid-template-columns:1fr}}
+.fuente{font-size:.8rem;color:var(--tinta-suave);margin-top:14px}
+.fuente a{color:inherit}
+
+/* ---------- Pie ---------- */
+.pie{background:#1D1D1B;color:#E9E4DA;margin-top:20px}
+.pie .envoltura{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:24px;padding-block:36px}
+.pie img{height:46px;width:auto;max-width:100%;display:block;margin-bottom:12px}
+.pie h4{font-family:var(--display);margin:0 0 8px;color:#fff}
+.pie p{margin:0 0 6px;font-size:.92rem}
+.pie a{color:#7FD4DC}
+@media (max-width:760px){.pie .envoltura{grid-template-columns:1fr}}
+
+/* ---------- Barra inferior (celular) ---------- */
+.tabbar{display:none}
+@media (max-width:760px){
+  body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:950;background:var(--tarjeta);border-top:1px solid var(--borde);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));box-shadow:0 -6px 20px var(--sombra)}
+  .tabbar a{display:grid;justify-items:center;gap:2px;padding:6px 2px;border-radius:14px;color:var(--tinta-suave);text-decoration:none;font-size:.72rem;font-weight:800}
+  .tabbar svg{width:24px;height:24px}
+  .tabbar a[aria-current="page"]{color:var(--tinta);background:var(--papel-2)}
+  .tabbar a[aria-current="page"] svg{color:var(--turquesa)}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom,0px))!important}
+}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tinta);color:var(--papel);padding:12px 20px;border-radius:999px;font-weight:800;z-index:2000;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.ver{opacity:1}
+
+/* Versión sin JavaScript (visores de archivos del celular): cada sección se abre con su #ancla */
+.estatica{display:none}
+.estatica:target{display:block;scroll-margin-top:80px}
+#app:has(.estatica:target) #inicio{display:none}
+
+@media (max-width:760px){
+  .calc{grid-template-columns:1fr}
+  .clima .dias{margin-left:0;width:100%;justify-content:space-between}
+  .linea::before{left:52px}.hito{grid-template-columns:44px 1fr;gap:28px}.hito .anio{font-size:.82rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="barra">
+  <div class="envoltura">
+    <a class="marca" href="#inicio" data-ir="inicio" aria-label="Descubriendo Santa Rosa de Calamuchita, inicio">
+      <img class="logo-claro" src="img/logo-claro.png" alt="Santa Rosa de Calamuchita">
+      <img class="logo-oscuro" src="img/logo-oscuro.png" alt="Santa Rosa de Calamuchita">
+    </a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#divertirme" data-ir="divertirme">Qué hacer</a>
+      <a href="#mapa" data-ir="mapa">Mapa</a>
+      <a href="#agenda" data-ir="agenda">Agenda</a>
+      <a href="#historia" data-ir="historia">Historia</a>
+      <a href="#hospedajes" data-ir="hospedajes">Dormir y comer</a>
+      <a href="#contacto" data-ir="contacto">Contacto</a>
+    </nav>
+    <button class="btn-mini solo-js" id="btnBuscar" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>Buscar</span></button>
+    <button class="btn-mini solo-js" id="btnTexto" aria-label="Cambiar tamaño de letra">Aa <span id="txtEsc">Normal</span></button>
+  </div>
+  <div class="franja"></div>
+</header>
+
+<main id="app">
+<section id="inicio">
+<section class="hero">
+  <div class="hero-fondo" role="img" aria-label="Ilustración en acuarela de Santa Rosa de Calamuchita: sierras en espiral, el río, el pueblo, el sol de Mayo, Santa Rosa de Lima y el cartel Las Malvinas son argentinas"></div>
+  <div class="envoltura hero-contenido">
+    <span class="bienvenida">Bienvenidos a</span>
+    <h1>Descubriendo Santa Rosa</h1>
+    <span class="linea-hero"></span>
+    <span class="lema">Corazón de Calamuchita · río, sierra e historia</span>
+    <div class="buscador solo-js" role="search">
+      <label for="s_inicio_buscar">¿Qué querés hacer o encontrar?</label>
+      <div class="campo-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input id="s_inicio_buscar" type="search" autocomplete="off" placeholder="Ej: balneario, cabaña, historia…" aria-controls="resultados"></div>
+      <ul class="resultados" id="s_inicio_resultados" hidden=""></ul>
+      <div class="sugerencias">Probá: <button data-sug="río">río</button><button data-sug="cabaña">cabaña</button><button data-sug="comer">comer</button><button data-sug="emergencia">emergencia</button></div>
+    </div>
+  </div>
+  <span class="credito">Santa Rosa en acuarela</span>
+</section>
+
+<div class="envoltura accesos-wrap">
+  <div class="accesos" aria-label="Accesos directos">
+    <a class="acceso" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0112 2.5a7 7 0 017 7C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg></span><span><b>Mapa en vivo</b><span>Qué tenés cerca</span></span></a>
+    <a class="acceso" style="--c:#FF7300" href="tel:+543546429652"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg></span><span><b>Llamar a Turismo</b><span>03546 429652</span></span></a>
+    <a class="acceso" style="--c:#93C01F" href="https://wa.me/5493546528914" target="_blank" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5l1.3-4.3A8.5 8.5 0 1112 20.5a8.4 8.4 0 01-4.1-1.1z"></path><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1a4 4 0 01-2-2l1-1-1-2z"></path></svg></span><span><b>WhatsApp</b><span>Consultas rápidas</span></span></a>
+    <a class="acceso solo-js" style="--c:#FF9E1B" href="#tips" data-ir="tips"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"></path></svg></span><span><b>Clima ahora</b><span id="s_inicio_climaMini">Cargando…</span></span></a>
+  </div>
+</div>
+
+<section class="bloque" style="padding-bottom:12px">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">un toque y listo</span><h2>¿Qué tenés ganas de hacer?</h2></div></div>
+    <div class="intereses">
+      <a class="interes" style="--c:#3AAFB9" href="#divertirme" data-ir="divertirme" data-filtro-ir="rio"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 9c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0M2 15c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0"></path></svg></span>Río</a><a class="interes" style="--c:#B8D435" href="#divertirme" data-ir="divertirme" data-filtro-ir="aventura"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 20l7-12 4 6 3-4 6 10z"></path></svg></span>Aventura</a><a class="interes" style="--c:#FF9E1B" href="#divertirme" data-ir="divertirme" data-filtro-ir="familia"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2 20a7 7 0 0114 0"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14a5 5 0 015 6"></path></svg></span>En familia</a><a class="interes" style="--c:#FFB25C" href="#divertirme" data-ir="divertirme" data-filtro-ir="cultura"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"></path><path d="M4 19a2 2 0 012-2h13"></path></svg></span>Cultura</a><a class="interes" style="--c:#7FD4DC" href="#divertirme" data-ir="divertirme" data-filtro-ir="noche"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"></path></svg></span>Noche</a><a class="interes" style="--c:#E9E0CF" href="#divertirme" data-ir="divertirme" data-filtro-ir="todo"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v18M3 12h18"></path></svg></span>Ver todo</a>
+    </div>
+  </div>
+</section>
+
+<section class="bloque">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">no te los podés perder</span><h2>Lugares imperdibles</h2></div><a class="enlace" href="#mapa" data-ir="mapa">Ver todos en el mapa <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+    <div class="lugares">
+      <article class="lugar">
+        <div class="recorte" style="background-position:52% 46%" role="img" aria-label="Playa Soleada"><span class="pill">Río</span></div>
+        <div class="lugar-cuerpo"><h3>Playa Soleada</h3><p>El balneario más concurrido del centro.</p>
+          <div class="acciones"><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="soleada">Mapa</a><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0688,-64.5352" target="_blank" rel="noopener">Ir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></div>
+      </article><article class="lugar">
+        <div class="recorte" style="background-position:97% 14%" role="img" aria-label="Cerro Vía Crucis"><span class="pill">Montaña</span></div>
+        <div class="lugar-cuerpo"><h3>Cerro Vía Crucis</h3><p>Subida a pie hasta la cruz. Ideal al atardecer.</p>
+          <div class="acciones"><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="viacrucis">Mapa</a><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0748,-64.5492" target="_blank" rel="noopener">Ir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></div>
+      </article><article class="lugar">
+        <div class="recorte" style="background-position:26% 66%" role="img" aria-label="Capilla Vieja"><span class="pill">Historia</span></div>
+        <div class="lugar-cuerpo"><h3>Capilla Vieja</h3><p>De 1784. Hoy es Museo de Arte Sacro.</p>
+          <div class="acciones"><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="capilla">Mapa</a><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0697,-64.5398" target="_blank" rel="noopener">Ir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></div>
+      </article><article class="lugar">
+        <div class="recorte" style="background-position:0% 42%" role="img" aria-label="Villa Santa Mónica"><span class="pill">Sierras</span></div>
+        <div class="lugar-cuerpo"><h3>Villa Santa Mónica</h3><p>A 3 km, con pulpería de 1929.</p>
+          <div class="acciones"><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="santamonica">Mapa</a><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0835,-64.565" target="_blank" rel="noopener">Ir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="bloque bloque-papel">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">¿cuánto tiempo tenés?</span><h2>Elegí tu escapada</h2></div><a class="enlace" href="#hospedajes" data-ir="hospedajes">Calcular mi presupuesto <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+    <div class="planes">
+      <article class="plan " style="--c:#3AAFB9">
+        <h3>Día de paseo</h3><p class="nota" style="margin:0">Venís y te volvés en el día.</p>
+        <div class="precio">$35.000<small>estimado por persona, de a dos</small></div>
+        <ul><li>Puentes y Capilla Vieja</li><li>Tarde de río en el centro</li><li>Merienda o cena en el centro</li></ul>
+        <a class="btn sec" href="#tips" data-ir="tips" data-plan-ir="1">Ver recorrido <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+      </article><article class="plan top" style="--c:#FF7300"><span class="cinta">El más elegido</span>
+        <h3>Finde serrano</h3><p class="nota" style="margin:0">Una noche para hacer río y cerro.</p>
+        <div class="precio">$72.950<small>estimado por persona, de a dos</small></div>
+        <ul><li>Todo lo del día de paseo</li><li>Vía Crucis al amanecer</li><li>Balneario Santa Rita</li><li>Una noche en cabaña</li></ul>
+        <a class="btn " href="#tips" data-ir="tips" data-plan-ir="2">Ver recorrido <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+      </article><article class="plan " style="--c:#93C01F">
+        <h3>Escapada de 3 días</h3><p class="nota" style="margin:0">Para conocer el valle completo.</p>
+        <div class="precio">$145.900<small>estimado por persona, de a dos</small></div>
+        <ul><li>Centro histórico y río</li><li>Villa Santa Mónica y su pulpería</li><li>Excursión a otro pueblo del valle</li><li>Dos noches de alojamiento</li></ul>
+        <a class="btn sec" href="#tips" data-ir="tips" data-plan-ir="3">Ver recorrido <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="bloque" style="padding-top:0">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">todo el año pasa algo</span><h2>Agenda de Santa Rosa</h2></div><a class="enlace" href="https://www.instagram.com/turismostarosa/" target="_blank" rel="noopener">Fechas al día en Instagram <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+    <div class="agenda"><article class="evento" style="--c:#3AAFB9"><span class="cuando">Enero y febrero</span><h3>Río y música</h3><p>Conciertos al aire libre junto al río. Gratis.</p><span class="donde">📍 Balnearios y paradores</span></article><article class="evento" style="--c:#FF9E1B"><span class="cuando">Semana Santa</span><h3>Delicias de Pascuas</h3><p>Repostería artesanal, chocolates y espectáculos para chicos.</p><span class="donde">📍 Centro</span></article><article class="evento" style="--c:#FF7300"><span class="cuando">Invierno</span><h3>Sabores Serranos</h3><p>Carnes asadas, locro y vinos de la región, con cocineros y productores locales.</p><span class="donde">📍 Frente al río</span></article><article class="evento" style="--c:#93C01F"><span class="cuando">Octubre</span><h3>Fiesta de la Cerveza</h3><p>Tres jornadas de cerveza artesanal, comida centroeuropea y música junto al río.</p><span class="donde">📍 Balneario Santa Rita</span></article></div>
+  </div>
+</section>
+
+<section class="bloque">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">preguntá lo que quieras</span><h2>¿Qué querés saber?</h2></div></div>
+    <div class="preguntas"><a class="pregunta" style="--c:#FF7300" href="#divertirme" data-ir="divertirme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>¿Qué puedo hacer si quiero divertirme?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#93C01F" href="#historia" data-ir="historia"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"></path><path d="M4 19a2 2 0 012-2h13"></path></svg></span><b>Todo sobre la historia de Santa Rosa</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#3AAFB9" href="#qrs" data-ir="qrs"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><path d="M14 14h3v3M21 14v7h-7"></path></svg></span><b>QRs y videos de todo lo que quieras saber</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#contacto" data-ir="contacto"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg></span><b>Contacto de la Oficina de Turismo + Instagram</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF9E1B" href="#nosotros" data-ir="nosotros"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2 20a7 7 0 0114 0"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14a5 5 0 015 6"></path></svg></span><b>¿Quiénes somos?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#hospedajes" data-ir="hospedajes"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg></span><b>Hospedajes, lugares para picar y presupuestos</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#93C01F" href="#tips" data-ir="tips"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="14" height="14" rx="3"></rect><path d="M9 7V5a3 3 0 016 0v2M9 14h6"></path></svg></span><b>Tips por si venís a recorrer unos días</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#3AAFB9" href="#team" data-ir="team"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 20l7-12 4 6 3-4 6 10z"></path></svg></span><b>¿Team montaña o río? (Se valen los dos)</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg></span><b>Mapa interactivo en vivo</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div>
+  </div>
+</section>
+
+<section class="bloque" style="padding-top:0">
+  <div class="envoltura">
+    <div class="datos-res">
+      <div class="datos">
+        <div class="dato"><b>9</b><span>balnearios</span></div>
+        <div class="dato"><b>1784</b><span>Capilla Vieja</span></div>
+        <div class="dato"><b>1914</b><span>Puente de Hierro</span></div>
+        <div class="dato"><b>96</b><span>km de Córdoba</span></div>
+      </div>
+      <a class="residente-cta" href="#residente" data-ir="residente">
+        <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span>
+        <span class="mano">¿sos de la zona?</span>
+        <b>Si sos residente y te quedaste con ganas de saber más, este video es para vos.</b>
+      </a>
+    </div>
+  </div>
+</section></section>
+<section id="agenda" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">Agenda de Santa Rosa</h1><p>Las fiestas y eventos de cada temporada. Las fechas exactas se publican cada año.</p></div>
+  <div class="agenda"><article class="evento" style="--c:#3AAFB9"><span class="cuando">Enero y febrero</span><h3>Río y música</h3><p>Conciertos al aire libre junto al río. Gratis.</p><span class="donde">📍 Balnearios y paradores</span></article><article class="evento" style="--c:#FF9E1B"><span class="cuando">Semana Santa</span><h3>Delicias de Pascuas</h3><p>Repostería artesanal, chocolates y espectáculos para chicos.</p><span class="donde">📍 Centro</span></article><article class="evento" style="--c:#FF7300"><span class="cuando">Invierno</span><h3>Sabores Serranos</h3><p>Carnes asadas, locro y vinos de la región, con cocineros y productores locales.</p><span class="donde">📍 Frente al río</span></article><article class="evento" style="--c:#93C01F"><span class="cuando">Octubre</span><h3>Fiesta de la Cerveza</h3><p>Tres jornadas de cerveza artesanal, comida centroeuropea y música junto al río.</p><span class="donde">📍 Balneario Santa Rita</span></article></div>
+  <div class="card" style="margin-top:16px"><h3>Feria de Artesanos</h3><p>Todo el año: cerámica, madera, textiles, cuero, joyería y productos regionales.</p><div class="acciones"><a class="btn turq" href="https://www.instagram.com/turismostarosa/" target="_blank" rel="noopener">Ver fechas en Instagram</a><a class="btn sec" href="https://turismo.santarosamuni.com/agenda" target="_blank" rel="noopener">Agenda oficial</a></div></div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#FF7300" href="#divertirme" data-ir="divertirme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>¿Qué puedo hacer si quiero divertirme?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#hospedajes" data-ir="hospedajes"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg></span><b>Hospedajes, lugares para picar y presupuestos</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#93C01F" href="#tips" data-ir="tips"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="14" height="14" rx="3"></rect><path d="M9 7V5a3 3 0 016 0v2M9 14h6"></path></svg></span><b>Tips por si venís a recorrer unos días</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="divertirme" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">¿Qué puedo hacer si quiero divertirme?</h1><p>Elegí lo que te gusta. Cada plan tiene el botón para ir directo.</p></div>
+  <div class="chips solo-js" role="group" aria-label="Filtrar actividades"><button class="chip" data-filtro="todo" aria-pressed="true">Todo</button><button class="chip" data-filtro="rio" aria-pressed="false">Río</button><button class="chip" data-filtro="aventura" aria-pressed="false">Aventura</button><button class="chip" data-filtro="familia" aria-pressed="false">En familia</button><button class="chip" data-filtro="cultura" aria-pressed="false">Cultura</button><button class="chip" data-filtro="noche" aria-pressed="false">Noche</button></div>
+  <div class="grilla" id="s_divertirme_listaAct"><article class="card"><span class="pill">Río</span><h3>Día de río en los balnearios</h3><p>Sobre el río Santa Rosa hay unos nueve balnearios con parrillas y sombra. Piedras Rosadas, Santa Rita y Ruphay son los más familiares; en el centro están El Remanso, El Puchuquí, Puente Colgante y Playa Soleada.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0688,-64.5352" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="soleada">Mapa</a></div></article><article class="card"><span class="pill">Aventura</span><h3>Subir al Cerro Vía Crucis</h3><p>Caminata por camino de piedras y espinillos hasta la gran cruz de madera. Andá antes del atardecer: la vista del pueblo es el premio.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0748,-64.5492" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="viacrucis">Mapa</a></div></article><article class="card"><span class="pill">Aventura</span><h3>Reserva La Cascada</h3><p>Sendero de sierra con aroma a espinillo que llega a una cascada escondida entre rocas. Llevá calzado con buen agarre, agua y gorra.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0738,-64.556" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="cascada">Mapa</a></div></article><article class="card"><span class="pill">Aventura</span><h3>Cabalgatas y bicicleta</h3><p>Salidas a caballo por paisajes serranos y mountain bike por senderos de bosque, río y cerro.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.076,-64.5205" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="rinconada">Mapa</a></div></article><article class="card"><span class="pill">Río</span><h3>Kayak y pesca deportiva</h3><p>Navegación en kayak y pesca en los ríos del valle. Consultá guías y permisos en la Oficina de Turismo.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.076,-64.5205" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="rinconada">Mapa</a></div></article><article class="card"><span class="pill">Aventura</span><h3>Miradores serranos</h3><p>Puntos altos con vista a todo el valle de Calamuchita. Los mejores para ver el atardecer detrás de las cumbres.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0748,-64.5492" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="viacrucis">Mapa</a></div></article><article class="card"><span class="pill">Noche</span><h3>Astroturismo</h3><p>Observación de estrellas en uno de los cielos más limpios del valle. Consultá fechas en la Oficina de Turismo.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0686,-64.5374" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="infocentro">Mapa</a></div></article><article class="card"><span class="pill">Cultura</span><h3>Feria de Artesanos</h3><p>Cerámica, madera, textiles, cuero, joyería y productos regionales hechos en la zona.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0686,-64.5374" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="infocentro">Mapa</a></div></article><article class="card"><span class="pill">Noche</span><h3>Salir de noche</h3><p>En temporada hay espectáculos, confiterías, pubs y boliches. El centro concentra casi todo en pocas cuadras.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0694,-64.5362" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="remanso">Mapa</a></div></article><article class="card"><span class="pill">En familia</span><h3>Paseo por los puentes</h3><p>Del Puente de Hierro (1914) al Puente Colgante caminando por la costanera. Apto para cochecitos y abuelos.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0668,-64.5384" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="hierro">Mapa</a></div></article><article class="card"><span class="pill">Cultura</span><h3>Capilla Vieja y Museo de Arte Sacro</h3><p>El edificio más antiguo del pueblo. Ideal para un día nublado.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0697,-64.5398" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="capilla">Mapa</a></div></article><article class="card"><span class="pill">Cultura</span><h3>Pulpería y truco en Santa Mónica</h3><p>A 3 km. En la Pulpería Don Segundo Sombra se juega al truco en ronda, apoyados en la barra.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0835,-64.565" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="santamonica">Mapa</a></div></article><article class="card"><span class="pill">En familia</span><h3>Excursiones por el valle</h3><p>Santa Rosa es buena base: Villa General Belgrano, La Cumbrecita y Yacanto quedan cerca. Consultá excursiones en la Oficina de Turismo.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0686,-64.5374" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="infocentro">Mapa</a></div></article><article class="card"><span class="pill">En familia</span><h3>Fiestas y eventos</h3><p>Río y música en verano, Delicias de Pascuas, Sabores Serranos en invierno y la Fiesta de la Cerveza en octubre.</p><div class="acciones"><a class="btn" href="#agenda" data-ir="agenda">Ver agenda <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article></div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg></span><b>Mapa interactivo en vivo</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF9E1B" href="#agenda" data-ir="agenda"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>Agenda de fiestas y eventos</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#hospedajes" data-ir="hospedajes"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg></span><b>Hospedajes, lugares para picar y presupuestos</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="historia" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">Todo sobre la historia de Santa Rosa</h1><p>De los comechingones al pueblo de hoy, en una sola línea de tiempo.</p></div>
+  <ol class="linea"><li class="hito" style="--c:#FF7300"><span class="anio">Antes</span><div class="caja"><h3>Los primeros habitantes</h3><p>Antes de la llegada de los españoles, el valle fue hogar de pueblos cazadores y recolectores y de los comechingones, que dejaron morteros y pinturas en la piedra.</p></div></li><li class="hito" style="--c:#FF9E1B"><span class="anio">1528</span><div class="caja"><h3>El primer español</h3><p>Francisco César cruza el Valle de Calamuchita buscando la ciudad del legendario Rey Blanco.</p></div></li><li class="hito" style="--c:#B8D435"><span class="anio">1575</span><div class="caja"><h3>Fecha de fundación</h3><p>No existe un acta de fundación. Se toma 1575 como el comienzo, con las primeras estancias españolas y la llegada de los jesuitas.</p></div></li><li class="hito" style="--c:#3AAFB9"><span class="anio">1642</span><div class="caja"><h3>La merced Carranza</h3><p>Las tierras pasan a Sebastián Carranza y de la Torre, un linaje muy ligado a la historia del pueblo.</p></div></li><li class="hito" style="--c:#FF7300"><span class="anio">1700</span><div class="caja"><h3>La capilla dominica</h3><p>Los dominicos levantan una capilla en honor a Santa Rosa de Lima. De ahí sale la primera parte del nombre.</p></div></li><li class="hito" style="--c:#FF9E1B"><span class="anio">1784</span><div class="caja"><h3>La Capilla Vieja</h3><p>Se completa la capilla que hoy conocemos como Capilla Vieja, centro espiritual y social del futuro pueblo. Hoy funciona allí el Museo de Arte Sacro.</p></div></li><li class="hito" style="--c:#B8D435"><span class="anio">1877</span><div class="caja"><h3>La nueva iglesia</h3><p>La capilla es reconstruida y se dona el predio para la Iglesia de Santa Rosa.</p></div></li><li class="hito" style="--c:#3AAFB9"><span class="anio">1914</span><div class="caja"><h3>Llega el Puente de Hierro</h3><p>Se instala el puente traído de Europa, parte del antiguo camino. Por él pasaron tropas y viajeros.</p></div></li><li class="hito" style="--c:#FF7300"><span class="anio">1935</span><div class="caja"><h3>Nace el pueblo</h3><p>Se lotea la vieja Estancia Santa Rosa, que había sido posta, primer hotel, correo y hasta escuela. Ahí empieza el pueblo moderno.</p></div></li></ol>
+  <h2 class="subtitulo">¿De dónde viene “Calamuchita”?</h2>
+  <p style="max-width:60ch;margin:0">Viene de la voz indígena “Ctalamochita”. Se forma con tres partes, y juntas quieren decir <b>abundancia de talas y molles</b>, dos árboles nativos.</p>
+  <div class="nombre-origen"><div><b>Ctala</b>tala</div><div><b>Mochi</b>molle</div><div><b>-ita</b>abundancia</div></div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#3AAFB9" href="#qrs" data-ir="qrs"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><path d="M14 14h3v3M21 14v7h-7"></path></svg></span><b>QRs y videos de todo lo que quieras saber</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#residente" data-ir="residente"><span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><b>Video para residentes</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#divertirme" data-ir="divertirme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>¿Qué puedo hacer si quiero divertirme?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="qrs" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">QRs y videos de todo lo que quieras saber</h1><p>Cada lugar tiene su video y su QR. Escaneá el código con la cámara del celu para abrir cómo llegar.</p></div>
+  <div class="grilla"><article class="card"><div class="foto">▶ Espacio para tu video<br>“Recorrido por el río”</div><h3>Recorrido por el río</h3><div style="display:flex;gap:14px;align-items:center"><div class="qr" id="s_qrs_qr0" title="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0688,-64.5352"><canvas width="232" height="232"></canvas><img style="display: none;"></div><div><p class="nota" style="margin:0 0 8px">Escaneá para abrir la ubicación.</p><a class="enlace" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0688,-64.5352" target="_blank" rel="noopener">o tocá acá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></div></article><article class="card"><div class="foto">▶ Espacio para tu video<br>“Historia de la Capilla Vieja”</div><h3>Historia de la Capilla Vieja</h3><div style="display:flex;gap:14px;align-items:center"><div class="qr" id="s_qrs_qr1" title="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0697,-64.5398"><canvas width="232" height="232"></canvas><img style="display: none;"></div><div><p class="nota" style="margin:0 0 8px">Escaneá para abrir la ubicación.</p><a class="enlace" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0697,-64.5398" target="_blank" rel="noopener">o tocá acá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></div></article><article class="card"><div class="foto">▶ Espacio para tu video<br>“Subida al Vía Crucis”</div><h3>Subida al Vía Crucis</h3><div style="display:flex;gap:14px;align-items:center"><div class="qr" id="s_qrs_qr2" title="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0748,-64.5492"><canvas width="232" height="232"></canvas><img style="display: none;"></div><div><p class="nota" style="margin:0 0 8px">Escaneá para abrir la ubicación.</p><a class="enlace" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0748,-64.5492" target="_blank" rel="noopener">o tocá acá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></div></article><article class="card"><div class="foto">▶ Espacio para tu video<br>“Los puentes de Santa Rosa”</div><h3>Los puentes de Santa Rosa</h3><div style="display:flex;gap:14px;align-items:center"><div class="qr" id="s_qrs_qr3" title="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0668,-64.5384"><canvas width="232" height="232"></canvas><img style="display: none;"></div><div><p class="nota" style="margin:0 0 8px">Escaneá para abrir la ubicación.</p><a class="enlace" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0668,-64.5384" target="_blank" rel="noopener">o tocá acá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></div></article><article class="card"><div class="foto">▶ Espacio para tu video<br>“Villa Santa Mónica”</div><h3>Villa Santa Mónica</h3><div style="display:flex;gap:14px;align-items:center"><div class="qr" id="s_qrs_qr4" title="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0835,-64.565"><canvas width="232" height="232"></canvas><img style="display: none;"></div><div><p class="nota" style="margin:0 0 8px">Escaneá para abrir la ubicación.</p><a class="enlace" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0835,-64.565" target="_blank" rel="noopener">o tocá acá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></div></article><article class="card"><div class="foto">▶ Espacio para tu video<br>“Dónde pedir información”</div><h3>Dónde pedir información</h3><div style="display:flex;gap:14px;align-items:center"><div class="qr" id="s_qrs_qr5" title="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0585,-64.5418"><canvas width="232" height="232"></canvas><img style="display: none;"></div><div><p class="nota" style="margin:0 0 8px">Escaneá para abrir la ubicación.</p><a class="enlace" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0585,-64.5418" target="_blank" rel="noopener">o tocá acá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></div></article></div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#93C01F" href="#historia" data-ir="historia"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"></path><path d="M4 19a2 2 0 012-2h13"></path></svg></span><b>Todo sobre la historia de Santa Rosa</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg></span><b>Mapa interactivo en vivo</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#contacto" data-ir="contacto"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg></span><b>Contacto de la Oficina de Turismo + Instagram</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="contacto" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">Contacto de la Oficina de Turismo</h1><p>Llamá o escribí con un toque. Para consultas, excursiones y la agenda del finde.</p></div>
+  <div class="grilla">
+    <article class="card"><span class="pill">Turismo</span><h3>Oficina de Informes Centro</h3><p>Córdoba 144, Centro</p><div class="contacto-num">03546 429652</div><p class="nota">También 03546 429654 · infoturismo@municipiosantarosa.gob.ar</p><div class="acciones"><a class="btn" href="tel:+543546429652"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg> Llamar</a><a class="btn turq" href="https://wa.me/5493546528914" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5l1.3-4.3A8.5 8.5 0 1112 20.5a8.4 8.4 0 01-4.1-1.1z"></path><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1a4 4 0 01-2-2l1-1-1-2z"></path></svg> WhatsApp</a><a class="btn sec" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0686,-64.5374" target="_blank" rel="noopener">Cómo llegar</a><button class="btn sec solo-js" data-copiar="03546 429652">Copiar</button></div></article><article class="card"><span class="pill">Turismo</span><h3>Oficina de Informes Regional</h3><p>Av. Fuerza Aérea y Ruta Pcial. N° 5</p><div class="contacto-num">3546 571272</div><p class="nota">Temporada baja 10 a 16 h · Temporada alta 8 a 20 h</p><div class="acciones"><a class="btn" href="tel:+543546571272"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg> Llamar</a><a class="btn sec" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0585,-64.5418" target="_blank" rel="noopener">Cómo llegar</a><button class="btn sec solo-js" data-copiar="3546 571272">Copiar</button></div></article><article class="card"><span class="pill">Turismo</span><h3>Municipalidad</h3><p>Córdoba 242</p><div class="contacto-num">03546 429650</div><p class="nota">Lunes a viernes de 8 a 13 h</p><div class="acciones"><a class="btn" href="tel:+543546429650"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg> Llamar</a><button class="btn sec solo-js" data-copiar="03546 429650">Copiar</button></div></article>
+    <article class="card"><span class="pill">Redes</span><h3>Seguinos en Instagram</h3><div class="contacto-num">@turismostarosa</div><p>Agenda de eventos, fiestas y novedades del día a día.</p><div class="acciones"><a class="btn turq" href="https://www.instagram.com/turismostarosa/" target="_blank" rel="noopener">Abrir Instagram</a></div></article>
+    <article class="card"><span class="pill">Emergencias</span><h3>Teléfonos útiles</h3><p><b>Policía:</b> <a href="tel:101">101</a> · <b>Salud:</b> <a href="tel:107">107</a></p><p><b>Bomberos:</b> <a href="tel:100">100</a> · <a href="tel:+543546421750">03546 421750</a></p><p><b>Hospital Regional:</b> <a href="tel:+543546426683">03546 426683</a></p></article>
+  </div>
+  <p class="nota" style="margin-top:16px">Datos del portal oficial de Turismo de Santa Rosa de Calamuchita. Confirmalos antes de publicar.</p>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg></span><b>Mapa interactivo en vivo</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#hospedajes" data-ir="hospedajes"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg></span><b>Hospedajes, lugares para picar y presupuestos</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#93C01F" href="#tips" data-ir="tips"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="14" height="14" rx="3"></rect><path d="M9 7V5a3 3 0 016 0v2M9 14h6"></path></svg></span><b>Tips por si venís a recorrer unos días</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="nosotros" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">¿Quiénes somos?</h1></div>
+  <div class="calc">
+    <div>
+      <p style="font-size:1.15rem;margin-top:0">[Escribí acá quiénes son: el equipo o la institución detrás de “Descubriendo Santa Rosa”.]</p>
+      <p>[Contá por qué hicieron esta guía, para quién es y qué los une con Santa Rosa. Dos o tres oraciones alcanzan.]</p>
+      <p>[Sumá un contacto propio o un mail para sugerencias.]</p>
+    </div>
+    <div class="foto">Espacio para foto del equipo</div>
+  </div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#0098A9" href="#contacto" data-ir="contacto"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg></span><b>Contacto de la Oficina de Turismo + Instagram</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#93C01F" href="#historia" data-ir="historia"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"></path><path d="M4 19a2 2 0 012-2h13"></path></svg></span><b>Todo sobre la historia de Santa Rosa</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#divertirme" data-ir="divertirme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>¿Qué puedo hacer si quiero divertirme?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="hospedajes" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">Hospedajes, lugares para picar y presupuestos</h1><p>Calculá cuánto gastás, elegí dónde dormir y dónde comer, todo en esta pantalla.</p></div>
+  <h2 class="subtitulo" style="margin-top:0">Calculá tu viaje</h2>
+  <div class="calc">
+    <div>
+      <div class="campo"><label for="s_hospedajes_cPers">Personas</label><div class="rango"><input type="range" id="s_hospedajes_cPers" min="1" max="10" value="2"><output id="s_hospedajes_oPers">2</output></div></div>
+      <div class="campo"><label for="s_hospedajes_cDias">Noches</label><div class="rango"><input type="range" id="s_hospedajes_cDias" min="1" max="14" value="2"><output id="s_hospedajes_oDias">2</output></div></div>
+      <div class="campo"><span style="font-weight:800">Alojamiento</span><div class="segmentos" role="group" aria-label="Alojamiento"><button class="chip" data-seg="aloj" data-val="camping" aria-pressed="false">Camping</button><button class="chip" data-seg="aloj" data-val="hotel" aria-pressed="false">Hotel o posada</button><button class="chip" data-seg="aloj" data-val="cabana" aria-pressed="true">Cabaña o depto</button></div></div><div class="campo"><span style="font-weight:800">Comidas</span><div class="segmentos" role="group" aria-label="Comidas"><button class="chip" data-seg="comida" data-val="eco" aria-pressed="false">Cocino yo</button><button class="chip" data-seg="comida" data-val="medio" aria-pressed="true">Intermedio</button><button class="chip" data-seg="comida" data-val="alto" aria-pressed="false">Salgo siempre</button></div></div><div class="campo"><span style="font-weight:800">Actividades</span><div class="segmentos" role="group" aria-label="Actividades"><button class="chip" data-seg="extras" data-val="nada" aria-pressed="false">Río y caminatas</button><button class="chip" data-seg="extras" data-val="algunas" aria-pressed="true">Algunas salidas</button><button class="chip" data-seg="extras" data-val="muchas" aria-pressed="false">A full</button></div></div>
+      <p class="nota solo-sin-js">La calculadora funciona al abrir la página en el navegador.</p>
+    </div>
+    <div class="total" aria-live="polite">
+      <div>Total estimado del viaje</div>
+      <div class="num" id="s_hospedajes_totNum">$291.800</div>
+      <div id="s_hospedajes_totPP">$145.900 por persona · 2 noches</div>
+      <table id="s_hospedajes_totTabla"><tbody><tr><td>Alojamiento (1 cabaña)</td><td>$151.800</td></tr><tr><td>Comidas</td><td>$100.000</td></tr><tr><td>Actividades</td><td>$40.000</td></tr></tbody></table>
+      <p class="nota">Cabaña: promedio de $75.900 por noche (AlquilerArgentina). Hotel: desde $50.459 por noche (TripAdvisor). Camping, comidas y actividades son estimados. Confirmá siempre con cada lugar.</p>
+    </div>
+  </div>
+
+  <h2 class="subtitulo">Dónde dormir</h2>
+  <div class="chips solo-js" role="group" aria-label="Tipo de alojamiento"><button class="chip" data-fh="todo" aria-pressed="true">Todos</button><button class="chip" data-fh="hotel" aria-pressed="false">Hotel o posada</button><button class="chip" data-fh="cabana" aria-pressed="false">Cabañas</button><button class="chip" data-fh="hostel" aria-pressed="false">Hostel</button><button class="chip" data-fh="camping" aria-pressed="false">Camping</button></div>
+  <div class="grilla" id="s_hospedajes_listaHosp"><article class="card"><span class="pill">Posada</span><h3>Posada Del Castor</h3><div class="puntaje"><span class="estrella">★</span><b>5,0</b><span>39 opiniones</span></div><p>Desayunos destacados, privacidad y cerca de los comercios.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Posada%20Del%20Castor%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Alojamiento</span><h3>La Matilda</h3><div class="puntaje"><span class="estrella">★</span><b>4,9</b><span>51 opiniones</span></div><p>Desayuno completo y habitaciones amplias.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=La%20Matilda%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Hostel</span><h3>Eiru Hostel</h3><div class="puntaje"><span class="estrella">★</span><b>4,9</b><span>7 opiniones</span></div><p>Muy buena atención. Apto para grupos.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Eiru%20Hostel%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Hostel</span><h3>Hostel Avetaia</h3><div class="puntaje"><span class="estrella">★</span><b>4,9</b><span>7 opiniones</span></div><p>Desayuno incluido e instalaciones nuevas.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Hostel%20Avetaia%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Posada</span><h3>Posada La Rosita</h3><div class="puntaje"><span class="estrella">★</span><b>4,8</b><span>54 opiniones</span></div><p>Desayuno incluido, pileta y jardín. Muy tranquila.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Posada%20La%20Rosita%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Posada</span><h3>Posada El Potrerillo</h3><div class="puntaje"><span class="estrella">★</span><b>4,7</b><span>47 opiniones</span></div><p>Junto al río y muy tranquila. No admite niños.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Posada%20El%20Potrerillo%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Camping</span><h3>La Olla Complejo Turístico</h3><div class="puntaje"><span class="estrella">★</span><b>4,7</b><span>29 opiniones</span></div><p>Parrilleros, despensa y baños limpios.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=La%20Olla%20Complejo%20Tur%C3%ADstico%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Cabañas</span><h3>Cabañas Verde y Blanco</h3><div class="puntaje"><span class="estrella">★</span><b>4,7</b><span>23 opiniones</span></div><p>Desayuno incluido y pileta.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Caba%C3%B1as%20Verde%20y%20Blanco%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Suites</span><h3>Jazmines del Río Suites</h3><div class="puntaje"><span class="estrella">★</span><b>4,7</b><span>16 opiniones</span></div><p>Balcones sobre la costanera.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Jazmines%20del%20R%C3%ADo%20Suites%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Hostel</span><h3>Hostel Tinktinkie</h3><div class="puntaje"><span class="estrella">★</span><b>4,6</b><span>16 opiniones</span></div><p>Desayuno incluido y trato cercano de los dueños.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Hostel%20Tinktinkie%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Complejo</span><h3>Complejo Valle del Sol</h3><div class="puntaje"><span class="estrella">★</span><b>4,5</b><span>243 opiniones</span></div><p>Varias piletas, desayuno y actividades para chicos. El más opinado.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Complejo%20Valle%20del%20Sol%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Complejo</span><h3>Complejo Vacacional Coovaeco</h3><div class="puntaje"><span class="estrella">★</span><b>4,4</b><span>107 opiniones</span></div><p>Cabañas, restaurante y pileta climatizada con vista al arroyo.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Complejo%20Vacacional%20Coovaeco%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Hotel</span><h3>Hotel Ypora</h3><div class="puntaje"><span class="estrella">★</span><b>4,3</b><span>46 opiniones</span></div><p>Renovado, con desayuno, parque con quinchos y estacionamiento amplio.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel%20Ypora%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Hotel</span><h3>Arcos del Río</h3><div class="puntaje"><span class="estrella">★</span><b>4,2</b><span>122 opiniones</span></div><p>Desayuno incluido y estacionamiento privado.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Arcos%20del%20R%C3%ADo%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Apart</span><h3>El Rodeo Apart Cabañas &amp; Suites</h3><div class="puntaje"><span class="estrella">★</span><b>4,2</b><span>45 opiniones</span></div><p>Frente al río, con un arroyo dentro del predio.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=El%20Rodeo%20Apart%20Caba%C3%B1as%20%26%20Suites%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article><article class="card"><span class="pill">Hotel</span><h3>Hotel Gloria</h3><div class="puntaje"><span class="estrella">★</span><b>4,2</b><span>41 opiniones</span></div><p>Desayuno, piscina y vista a las sierras. A 100 m del balneario El Remanso.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel%20Gloria%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Ver y contactar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div></article></div>
+  <div class="card" style="margin-top:16px;flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px"><div style="flex:1;min-width:220px"><h3>¿Buscás más opciones?</h3><p>La Municipalidad tiene más de 100 alojamientos habilitados, con capacidad, servicios y distancia al río.</p></div><a class="btn turq" href="https://turismo360.santarosamuni.com/" target="_blank" rel="noopener">Ver alojamientos habilitados</a></div>
+
+  <h2 class="subtitulo">Para picar</h2>
+  <p style="margin:0 0 14px;color:var(--tinta-suave)">Para probar: asado a la estaca, empanadas cortadas a cuchillo, cerveza artesanal del valle y alfajores de Calamuchita.</p>
+  <div class="chips solo-js" role="group" aria-label="Tipo de comida"><button class="chip" data-fp="todo" aria-pressed="true">Todo</button><button class="chip" data-fp="parrilla" aria-pressed="false">Parrilla</button><button class="chip" data-fp="pastas" aria-pressed="false">Pastas y pizza</button><button class="chip" data-fp="bares" aria-pressed="false">Bares</button><button class="chip" data-fp="regional" aria-pressed="false">Regional</button><button class="chip" data-fp="vista" aria-pressed="false">Con vista</button></div>
+  <div class="grilla" id="s_hospedajes_listaPicar"><article class="card"><span class="pill">Italiana</span><h3>Nonna Bertina</h3><div class="puntaje"><span class="estrella">★</span><b>4,6</b><span>232 opiniones</span></div><p>Cocina italiana toscana. Puede demorar, pero vale la espera.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Nonna%20Bertina%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Cocina argentina</span><h3>La Vaquita</h3><div class="puntaje"><span class="estrella">★</span><b>4,5</b><span>299 opiniones</span></div><p>Restaurante familiar. Famosa su tortilla rellena.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=La%20Vaquita%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="vaquita">Mapa</a></div></article><article class="card"><span class="pill">Delicatessen</span><h3>Fábrica de Chacinados El Campito</h3><div class="puntaje"><span class="estrella">★</span><b>4,4</b><span>14 opiniones</span></div><p>Fiambres y chacinados para armar la picada.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=F%C3%A1brica%20de%20Chacinados%20El%20Campito%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Mexicana</span><h3>La Calaca</h3><div class="puntaje"><span class="estrella">★</span><b>4,4</b><span>9 opiniones</span></div><p>Una opción distinta en el valle.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=La%20Calaca%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Pastas caseras</span><h3>Todo Pastas</h3><div class="puntaje"><span class="estrella">★</span><b>4,3</b><span>57 opiniones</span></div><p>El lugar para comer pastas caseras.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Todo%20Pastas%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Pub</span><h3>Piedra Madre</h3><div class="puntaje"><span class="estrella">★</span><b>4,3</b><span>16 opiniones</span></div><p>Cocina de fusión y tragos.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Piedra%20Madre%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Bar de vinos</span><h3>El Chañar Resto Bar</h3><div class="puntaje"><span class="estrella">★</span><b>4,3</b><span>15 opiniones</span></div><p>Cocina italiana y buenos vinos.</p><p class="nota">Precio: <span class="precio-nivel">$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=El%20Cha%C3%B1ar%20Resto%20Bar%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Parador serrano</span><h3>Cantina de Montaña</h3><div class="puntaje"><span class="estrella">★</span><b>4,1</b><span>24 opiniones</span></div><p>En la entrada al sendero de La Cascada, con vista al pueblo.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Cantina%20de%20Monta%C3%B1a%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="cascada">Mapa</a></div></article><article class="card"><span class="pill">Pizzería</span><h3>Pizza Siete</h3><div class="puntaje"><span class="estrella">★</span><b>4,0</b><span>165 opiniones</span></div><p>Pizza rica y económica.</p><p class="nota">Precio: <span class="precio-nivel">$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Pizza%20Siete%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Parrilla</span><h3>La 5 Parrilla</h3><div class="puntaje"><span class="estrella">★</span><b>4,0</b><span>39 opiniones</span></div><p>Buena parrilla, también con pescados.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=La%205%20Parrilla%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Cocina casera</span><h3>Moe Moeea</h3><div class="puntaje"><span class="estrella">★</span><b>4,0</b><span>25 opiniones</span></div><p>Donde come la gente del lugar.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Moe%20Moeea%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></article><article class="card"><span class="pill">Parrilla</span><h3>La Pulpería de los Ferreyra</h3><div class="puntaje"><span class="estrella">★</span><b>3,9</b><span>487 opiniones</span></div><p>La más visitada. Ambiente de época y flan casero con dulce de leche.</p><p class="nota">Precio: <span class="precio-nivel">$$–$$$</span></p><div class="acciones"><a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=La%20Pulper%C3%ADa%20de%20los%20Ferreyra%20Santa%20Rosa%20de%20Calamuchita" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="ferreyra">Mapa</a></div></article></div>
+  <p class="fuente">Puntajes y opiniones de <a href="https://www.tripadvisor.com.ar/Hotels-g312773-Santa_Rosa_de_Calamuchita_Province_of_Cordoba_Central_Argentina-Hotels.html" target="_blank" rel="noopener">TripAdvisor</a>, consultados en noviembre de 2026. $ = económico · $$–$$$ = precio medio.</p>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg></span><b>Mapa interactivo en vivo</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#93C01F" href="#tips" data-ir="tips"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="14" height="14" rx="3"></rect><path d="M9 7V5a3 3 0 016 0v2M9 14h6"></path></svg></span><b>Tips por si venís a recorrer unos días</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#contacto" data-ir="contacto"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg></span><b>Contacto de la Oficina de Turismo + Instagram</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="tips" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">Tips por si venís a recorrer unos días</h1><p>El clima, tu recorrido y una lista para no olvidarte nada.</p></div>
+  <div class="clima solo-js" id="s_tips_clima" aria-live="polite"><span class="det">Cargando el clima de ahora en Santa Rosa…</span></div>
+  <div class="calc" style="margin-top:22px">
+    <div><h2 class="subtitulo" style="margin-top:0">Armá tu recorrido</h2>
+      <div class="chips solo-js" role="group" aria-label="Cantidad de días"><button class="chip" data-plan="1" aria-pressed="true">1 día</button><button class="chip" data-plan="2" aria-pressed="false">2 días</button><button class="chip" data-plan="3" aria-pressed="false">3 días</button></div>
+      <div id="s_tips_plan" class="grilla" style="grid-template-columns:1fr"><div class="card"><span class="pill">Mañana</span><p style="color:var(--tinta)">Paseo por los puentes y la Capilla Vieja</p></div><div class="card"><span class="pill">Tarde</span><p style="color:var(--tinta)">Balneario en el centro</p></div><div class="card"><span class="pill">Noche</span><p style="color:var(--tinta)">Cena en el centro</p></div></div>
+    </div>
+    <div><h2 class="subtitulo" style="margin-top:0">Cómo llegar</h2>
+      <div class="card" style="margin-bottom:6px"><p><b>Desde Córdoba:</b> 96 km por la Ruta Provincial 5, pasando por el dique Los Molinos.</p><p><b>Desde Buenos Aires:</b> unos 700 km por la RN 9 hasta Río Segundo y después RP 13 y RP 5.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=Santa+Rosa+de+Calamuchita,+Córdoba" target="_blank" rel="noopener">Abrir ruta <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a></div></div>
+      <h2 class="subtitulo">Antes de salir</h2><label class="check"><input type="checkbox" id="s_tips_tip0" data-tip="0"><span>Traé protector solar, gorra y agua: el sol serrano pega fuerte.</span></label><label class="check"><input type="checkbox" id="s_tips_tip1" data-tip="1"><span>Zapatillas cómodas para el Vía Crucis y los senderos.</span></label><label class="check"><input type="checkbox" id="s_tips_tip2" data-tip="2"><span>Llevá efectivo: en algunos balnearios y ferias no hay posnet.</span></label><label class="check"><input type="checkbox" id="s_tips_tip3" data-tip="3"><span>En verano reservá el alojamiento con anticipación.</span></label><label class="check"><input type="checkbox" id="s_tips_tip4" data-tip="4"><span>Si suenan las sirenas en los balnearios, salí del agua: es la alerta de crecida del río.</span></label><label class="check"><input type="checkbox" id="s_tips_tip5" data-tip="5"><span>El acampe libre está prohibido: usá los campings habilitados.</span></label><label class="check"><input type="checkbox" id="s_tips_tip6" data-tip="6"><span>Llevate la basura, no tires colillas y no hagas fuego fuera de las parrillas.</span></label><label class="check"><input type="checkbox" id="s_tips_tip7" data-tip="7"><span>Abrigo para la noche: refresca aun en verano.</span></label><label class="check"><input type="checkbox" id="s_tips_tip8" data-tip="8"><span>Pasá por la Oficina de Informes para la agenda de la semana.</span></label><p class="nota solo-js">Lo que marques queda guardado en este dispositivo.</p></div>
+  </div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#FF7300" href="#hospedajes" data-ir="hospedajes"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg></span><b>Hospedajes, lugares para picar y presupuestos</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#divertirme" data-ir="divertirme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>¿Qué puedo hacer si quiero divertirme?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg></span><b>Mapa interactivo en vivo</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="team" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">¿Team montaña o río?</h1><p>Cinco preguntas, un toque cada una. Spoiler: se valen los dos.</p></div>
+  <div class="quiz" id="s_team_quiz"><div class="barra-prog"><i style="width:0%"></i></div><span class="pill">Pregunta 1 de 5</span><h2 style="font-size:1.4rem;margin-top:10px">Es sábado a la mañana. ¿Qué te dan ganas de hacer?</h2><div class="opciones"><button class="opcion" data-v="m">Caminar hasta un mirador</button><button class="opcion" data-v="r">Tirarme al sol al lado del agua</button><button class="opcion" data-v="a">Un poco de cada cosa</button></div></div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#FF7300" href="#divertirme" data-ir="divertirme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>¿Qué puedo hacer si quiero divertirme?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg></span><b>Mapa interactivo en vivo</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#93C01F" href="#tips" data-ir="tips"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="14" height="14" rx="3"></rect><path d="M9 7V5a3 3 0 016 0v2M9 14h6"></path></svg></span><b>Tips por si venís a recorrer unos días</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="residente" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">¿Sos residente y te quedaste con ganas de saber más?</h1><p>Este video es para vos: lo que no sale en las guías, contado por la gente del lugar.</p></div>
+  <div class="mapa-caja" style="aspect-ratio:16/9;max-width:100%;display:grid;place-items:center;text-align:center;padding:20px">
+    <!-- Reemplazá este bloque por tu video, por ejemplo:
+         <video src="video-residentes.mp4" controls poster="portada.jpg" style="width:100%;height:100%"></video> -->
+    <div><span class="btn" style="font-size:1.1rem;padding:16px 26px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg> Video de residentes</span><p class="nota" style="margin-top:12px">Espacio para el video</p></div>
+  </div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#93C01F" href="#historia" data-ir="historia"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"></path><path d="M4 19a2 2 0 012-2h13"></path></svg></span><b>Todo sobre la historia de Santa Rosa</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#3AAFB9" href="#qrs" data-ir="qrs"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><path d="M14 14h3v3M21 14v7h-7"></path></svg></span><b>QRs y videos de todo lo que quieras saber</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#contacto" data-ir="contacto"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg></span><b>Contacto de la Oficina de Turismo + Instagram</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+<section id="mapa" class="estatica"><div class="banda" aria-hidden="true"></div><div class="envoltura vista">
+  <div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg> Inicio</a></div>
+  <div class="vista-cab"><h1 tabindex="-1">Mapa interactivo en vivo</h1><p>Activá tu ubicación y te decimos qué tenés más cerca.</p></div>
+  <div class="mapa-ctrl solo-js">
+    <button class="btn" id="s_mapa_btnYo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0112 2.5a7 7 0 017 7C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg> Mostrar dónde estoy</button>
+    <button class="chip" data-capa="historia" aria-pressed="true" style="border-color:#FF7300">Historia</button><button class="chip" data-capa="rio" aria-pressed="true" style="border-color:#3AAFB9">Río</button><button class="chip" data-capa="montana" aria-pressed="true" style="border-color:#93C01F">Montaña</button><button class="chip" data-capa="comida" aria-pressed="true" style="border-color:#FF9E1B">Para picar</button><button class="chip" data-capa="servicio" aria-pressed="true" style="border-color:#0098A9">Turismo</button>
+  </div>
+  <div class="mapa-caja"><div role="region" aria-label="Mapa de Santa Rosa" class="mapa-aviso" tabindex="0" style="position: relative;">El mapa en vivo se activa al abrir la página en el navegador.<br><a href="https://www.google.com/maps/search/?api=1&amp;query=Santa+Rosa+de+Calamuchita" target="_blank" rel="noopener">Abrir Santa Rosa en Google Maps →</a></div></div>
+  <p class="nota solo-js" id="s_mapa_cerca" style="margin-top:10px">Tocá un punto para ver la info y el botón “Cómo llegar”.</p>
+  <h2 class="subtitulo">Todos los lugares</h2>
+  <div class="grilla" id="s_mapa_listaLug"><article class="card"><span class="pill" style="background:#FF7300;color:#1D1D1B">Historia</span><h3>Capilla Vieja (Museo de Arte Sacro)</h3><p>De 1784, reconstruida en 1877. El corazón histórico del pueblo.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0697,-64.5398" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="capilla">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#FF7300;color:#1D1D1B">Historia</span><h3>Puente de Hierro</h3><p>Puente de 1914, traído de Europa. Paseo histórico junto al río.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0668,-64.5384" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="hierro">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#3AAFB9;color:#1D1D1B">Río</span><h3>Puente Colgante</h3><p>Más de 50 años cruzando el río Santa Rosa.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0702,-64.5335" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="colgante">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#93C01F;color:#1D1D1B">Montaña</span><h3>Cerro Vía Crucis</h3><p>Subida a pie por camino de piedras hasta una gran cruz de madera. Vista de todo el valle.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0748,-64.5492" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="viacrucis">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#3AAFB9;color:#1D1D1B">Río</span><h3>Balneario Santa Rita</h3><p>Ideal para familias y para descansar.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.064,-64.5312" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="santarita">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#3AAFB9;color:#1D1D1B">Río</span><h3>Playa Soleada</h3><p>La playa más famosa del centro. Mucha gente en verano.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0688,-64.5352" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="soleada">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#3AAFB9;color:#1D1D1B">Río</span><h3>Balneario El Remanso</h3><p>En pleno centro, con parrillas y sombra.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0694,-64.5362" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="remanso">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#3AAFB9;color:#1D1D1B">Río</span><h3>Vado La Rinconada</h3><p>Uno de los balnearios más tranquilos, en las afueras.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.076,-64.5205" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="rinconada">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#93C01F;color:#1D1D1B">Montaña</span><h3>Reserva La Cascada</h3><p>Sendero de sierra entre espinillos hasta una cascada natural. En la entrada está la Cantina de Montaña.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0738,-64.556" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="cascada">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#93C01F;color:#1D1D1B">Montaña</span><h3>Villa Santa Mónica</h3><p>A 3 km, camino a Yacanto. Capilla de 1815 y la Pulpería Don Segundo Sombra (1929).</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0835,-64.565" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="santamonica">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#0098A9;color:#1D1D1B">Turismo</span><h3>Oficina de Informes Centro</h3><p>Córdoba 144 · Tel. 03546 429652/54</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0686,-64.5374" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="infocentro">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#0098A9;color:#1D1D1B">Turismo</span><h3>Oficina de Informes Regional</h3><p>Av. Fuerza Aérea y Ruta Pcial. 5</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.0585,-64.5418" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="inforegional">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#FF9E1B;color:#1D1D1B">Para picar</span><h3>La Vaquita (restaurante)</h3><p>Restaurante familiar, buena cocina y vinos.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.068,-64.539" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="vaquita">Ver en el mapa</button></div></article><article class="card"><span class="pill" style="background:#FF9E1B;color:#1D1D1B">Para picar</span><h3>La Pulpería de los Ferreyra</h3><p>Ambiente de época. Pedí el flan casero con dulce de leche.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=-32.071,-64.542" target="_blank" rel="noopener">Cómo llegar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"></path></svg></a><button class="btn sec solo-js" data-volar="ferreyra">Ver en el mapa</button></div></article></div>
+  <div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas"><a class="pregunta" style="--c:#FF7300" href="#divertirme" data-ir="divertirme"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"></path><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"></path></svg></span><b>¿Qué puedo hacer si quiero divertirme?</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#FF7300" href="#hospedajes" data-ir="hospedajes"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg></span><b>Hospedajes, lugares para picar y presupuestos</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a><a class="pregunta" style="--c:#0098A9" href="#contacto" data-ir="contacto"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"></path></svg></span><b>Contacto de la Oficina de Turismo + Instagram</b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div></div>
+</div></section>
+</main>
+
+<footer class="pie">
+  <div class="franja"></div>
+  <div class="envoltura">
+    <div>
+      <img src="img/logo-oscuro.png" alt="Santa Rosa de Calamuchita">
+      <p>Guía para descubrir Santa Rosa de Calamuchita: río, sierra e historia en el corazón del valle.</p>
+    </div>
+    <div>
+      <h4>Oficina de Turismo</h4>
+      <p>Córdoba 144, Centro</p>
+      <p><a href="mailto:infoturismo@municipiosantarosa.gob.ar">infoturismo@municipiosantarosa.gob.ar</a></p>
+      <p>Tel. <a href="tel:+543546429652">03546 429652</a></p>
+      <p>WhatsApp <a href="https://wa.me/5493546528914" target="_blank" rel="noopener">3546 528914</a></p>
+      <p>Instagram <a href="https://www.instagram.com/turismostarosa/" target="_blank" rel="noopener">@turismostarosa</a></p>
+    </div>
+    <div>
+      <h4>Emergencias</h4>
+      <p>Policía <a href="tel:101">101</a> · Salud <a href="tel:107">107</a></p>
+      <p>Bomberos <a href="tel:100">100</a> · <a href="tel:+543546421750">03546 421750</a></p>
+      <p>Hospital Regional <a href="tel:+543546426683">03546 426683</a></p>
+    </div>
+  </div>
+</footer>
+
+<nav class="tabbar" aria-label="Navegación principal">
+  <a href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Inicio</a>
+  <a href="#divertirme" data-ir="divertirme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"/><path d="M14 4l1 2M19 9l2 1M17 3l-1 3"/></svg>Qué hacer</a>
+  <a href="#mapa" data-ir="mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0112 2.5a7 7 0 017 7C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Mapa</a>
+  <a href="#hospedajes" data-ir="hospedajes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V7M3 13h18v5M21 13v-2a3 3 0 00-3-3h-7v5"/><circle cx="7" cy="10.5" r="1.8"/></svg>Dormir</a>
+  <a href="#contacto" data-ir="contacto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"/></svg>Contacto</a>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+document.documentElement.classList.add("js");
+
+/* ============ DATOS (editá acá) ============ */
+const CENTRO = [-32.0690, -64.5370];
+/* Imagen de la ilustración (si la renombrás, cambiala acá y en --fondo) */
+const IMG_FONDO = "img/fondo.jpg";
+const TURISMO = {tel:"03546 429652", telLink:"tel:+543546429652", ws:"3546 528914", wsLink:"https://wa.me/5493546528914"};
+
+/* Coordenadas aproximadas: revisalas en Google Maps antes de publicar */
+const LUGARES = [
+  {id:"capilla", n:"Capilla Vieja (Museo de Arte Sacro)", t:"historia", ll:[-32.0697,-64.5398], d:"De 1784, reconstruida en 1877. El corazón histórico del pueblo."},
+  {id:"hierro", n:"Puente de Hierro", t:"historia", ll:[-32.0668,-64.5384], d:"Puente de 1914, traído de Europa. Paseo histórico junto al río."},
+  {id:"colgante", n:"Puente Colgante", t:"rio", ll:[-32.0702,-64.5335], d:"Más de 50 años cruzando el río Santa Rosa."},
+  {id:"viacrucis", n:"Cerro Vía Crucis", t:"montana", ll:[-32.0748,-64.5492], d:"Subida a pie por camino de piedras hasta una gran cruz de madera. Vista de todo el valle."},
+  {id:"santarita", n:"Balneario Santa Rita", t:"rio", ll:[-32.0640,-64.5312], d:"Ideal para familias y para descansar."},
+  {id:"soleada", n:"Playa Soleada", t:"rio", ll:[-32.0688,-64.5352], d:"La playa más famosa del centro. Mucha gente en verano."},
+  {id:"remanso", n:"Balneario El Remanso", t:"rio", ll:[-32.0694,-64.5362], d:"En pleno centro, con parrillas y sombra."},
+  {id:"rinconada", n:"Vado La Rinconada", t:"rio", ll:[-32.0760,-64.5205], d:"Uno de los balnearios más tranquilos, en las afueras."},
+  {id:"cascada", n:"Reserva La Cascada", t:"montana", ll:[-32.0738,-64.5560], d:"Sendero de sierra entre espinillos hasta una cascada natural. En la entrada está la Cantina de Montaña."},
+  {id:"santamonica", n:"Villa Santa Mónica", t:"montana", ll:[-32.0835,-64.5650], d:"A 3 km, camino a Yacanto. Capilla de 1815 y la Pulpería Don Segundo Sombra (1929)."},
+  {id:"infocentro", n:"Oficina de Informes Centro", t:"servicio", ll:[-32.0686,-64.5374], d:"Córdoba 144 · Tel. 03546 429652/54"},
+  {id:"inforegional", n:"Oficina de Informes Regional", t:"servicio", ll:[-32.0585,-64.5418], d:"Av. Fuerza Aérea y Ruta Pcial. 5"},
+  {id:"vaquita", n:"La Vaquita (restaurante)", t:"comida", ll:[-32.0680,-64.5390], d:"Restaurante familiar, buena cocina y vinos."},
+  {id:"ferreyra", n:"La Pulpería de los Ferreyra", t:"comida", ll:[-32.0710,-64.5420], d:"Ambiente de época. Pedí el flan casero con dulce de leche."}
+];
+/* Colores del isologo para cada tipo de lugar */
+const TIPOS = {
+  historia:{n:"Historia", c:"#FF7300", l:"H"},
+  rio:{n:"Río", c:"#3AAFB9", l:"R"},
+  montana:{n:"Montaña", c:"#93C01F", l:"M"},
+  comida:{n:"Para picar", c:"#FF9E1B", l:"C"},
+  servicio:{n:"Turismo", c:"#0098A9", l:"i"}
+};
+
+const ICON = {
+  fiesta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l5-14 9 9-14 5z"/><path d="M14 4l1 2M19 9l2 1M17 3l-1 3M21 7l-3 1"/></svg>',
+  libro:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13"/></svg>',
+  qr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-7"/></svg>',
+  tel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"/></svg>',
+  ws:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5l1.3-4.3A8.5 8.5 0 1112 20.5a8.4 8.4 0 01-4.1-1.1z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1a4 4 0 01-2-2l1-1-1-2z"/></svg>',
+  gente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0114 0"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a5 5 0 015 6"/></svg>',
+  casa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>',
+  mochila:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="14" height="14" rx="3"/><path d="M9 7V5a3 3 0 016 0v2M9 14h6"/></svg>',
+  cerro:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 20l7-12 4 6 3-4 6 10z"/></svg>',
+  ola:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 9c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0M2 15c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0"/></svg>',
+  luna:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></svg>',
+  todo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v18M3 12h18"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0112 2.5a7 7 0 017 7C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  mapa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  ruta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>',
+  sol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>',
+  buscar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+  flecha:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  atras:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>'
+};
+
+const PREGUNTAS = [
+  {id:"divertirme", q:"¿Qué puedo hacer si quiero divertirme?", c:"#FF7300", i:"fiesta"},
+  {id:"historia", q:"Todo sobre la historia de Santa Rosa", c:"#93C01F", i:"libro"},
+  {id:"qrs", q:"QRs y videos de todo lo que quieras saber", c:"#3AAFB9", i:"qr"},
+  {id:"contacto", q:"Contacto de la Oficina de Turismo + Instagram", c:"#0098A9", i:"tel"},
+  {id:"nosotros", q:"¿Quiénes somos?", c:"#FF9E1B", i:"gente"},
+  {id:"hospedajes", q:"Hospedajes, lugares para picar y presupuestos", c:"#FF7300", i:"casa"},
+  {id:"tips", q:"Tips por si venís a recorrer unos días", c:"#93C01F", i:"mochila"},
+  {id:"team", q:"¿Team montaña o río? (Se valen los dos)", c:"#3AAFB9", i:"cerro"},
+  {id:"mapa", q:"Mapa interactivo en vivo", c:"#0098A9", i:"mapa"}
+];
+/* Qué secciones sugerir al final de cada una */
+const RELACION = {
+  divertirme:["mapa","agenda","hospedajes"], historia:["qrs","residente","divertirme"], qrs:["historia","mapa","contacto"],
+  contacto:["mapa","hospedajes","tips"], nosotros:["contacto","historia","divertirme"], hospedajes:["mapa","tips","contacto"],
+  tips:["hospedajes","divertirme","mapa"], team:["divertirme","mapa","tips"], residente:["historia","qrs","contacto"], mapa:["divertirme","hospedajes","contacto"], agenda:["divertirme","hospedajes","tips"]
+};
+
+/* ============ UTILIDADES ============ */
+const $ = s => document.querySelector(s);
+const app = $("#app");
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("ver");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("ver"),2200)}
+function copiar(txt){
+  const ok=()=>toast("Copiado: "+txt);
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(ok).catch(()=>toast("Seleccioná el número para copiarlo"))}
+  else toast("Seleccioná el número para copiarlo");
+}
+function guardar(k,v){try{localStorage.setItem("sr_"+k,JSON.stringify(v))}catch(e){}}
+function leer(k,def){try{const v=localStorage.getItem("sr_"+k);return v?JSON.parse(v):def}catch(e){return def}}
+const comoLlegar = ll => `https://www.google.com/maps/dir/?api=1&destination=${ll[0]},${ll[1]}`;
+const telLink = t => "tel:+54"+t.replace(/\D/g,"").replace(/^0/,"");
+const lugar = id => LUGARES.find(x=>x.id===id);
+const EXTRA_SECC = {residente:{id:"residente",q:"Video para residentes",c:"#0098A9",i:"play"}, agenda:{id:"agenda",q:"Agenda de fiestas y eventos",c:"#FF9E1B",i:"fiesta"}};
+const preg = id => PREGUNTAS.find(p=>p.id===id) || EXTRA_SECC[id];
+function cabecera(titulo,bajada){
+  return `<div class="migas"><a class="btn-mini" href="#inicio" data-ir="inicio">${ICON.atras} Inicio</a></div>
+  <div class="vista-cab"><h1>${titulo}</h1>${bajada?`<p>${bajada}</p>`:""}</div>`;
+}
+function tarjetaPregunta(p){return `<a class="pregunta" style="--c:${p.c}" href="#${p.id}" data-ir="${p.id}"><span class="ic">${ICON[p.i]}</span><b>${p.q}</b><span class="fl">${ICON.flecha}</span></a>`}
+function seguir(id){return `<div class="seguir"><span class="mano" style="font-size:1.4rem;color:var(--turquesa-txt)">seguí explorando</span><div class="preguntas">${(RELACION[id]||[]).map(x=>tarjetaPregunta(preg(x))).join("")}</div></div>`}
+
+/* Tamaño de letra (pensado para todas las edades) */
+const ESCALAS=[[1,"Normal"],[1.15,"Grande"],[1.3,"Muy grande"]];
+let esc=leer("esc",0);
+function aplicarEsc(){document.documentElement.style.setProperty("--escala",ESCALAS[esc][0]);$("#txtEsc").textContent=ESCALAS[esc][1]}
+$("#btnTexto").onclick=()=>{esc=(esc+1)%ESCALAS.length;guardar("esc",esc);aplicarEsc()};
+aplicarEsc();
+
+/* ============ CLIMA EN VIVO (Open-Meteo, sin clave) ============ */
+const COD={0:["Despejado","☀️"],1:["Mayormente despejado","🌤️"],2:["Parcialmente nublado","⛅"],3:["Nublado","☁️"],45:["Niebla","🌫️"],48:["Niebla","🌫️"],51:["Llovizna","🌦️"],53:["Llovizna","🌦️"],55:["Llovizna","🌦️"],61:["Lluvia","🌧️"],63:["Lluvia","🌧️"],65:["Lluvia fuerte","🌧️"],80:["Chaparrones","🌦️"],81:["Chaparrones","🌦️"],82:["Chaparrones fuertes","⛈️"],95:["Tormenta","⛈️"],96:["Tormenta","⛈️"],99:["Tormenta","⛈️"]};
+let climaCache=null;
+async function cargarClima(){
+  if(climaCache) return climaCache;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${CENTRO[0]}&longitude=${CENTRO[1]}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America%2FArgentina%2FCordoba&forecast_days=4`;
+  const r=await fetch(url); if(!r.ok) throw new Error();
+  climaCache=await r.json(); return climaCache;
+}
+function htmlClima(){return `<div class="clima solo-js" id="clima" aria-live="polite"><span class="det">Cargando el clima de ahora en Santa Rosa…</span></div>`}
+async function pintarClima(){
+  const el=$("#clima"); if(!el) return;
+  try{
+    const d=await cargarClima(), c=d.current, [txt,emo]=COD[c.weather_code]||["",""];
+    const dn=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+    const dias=d.daily.time.slice(1,4).map((t,i)=>{const e=(COD[d.daily.weather_code[i+1]]||["","🌡️"])[1];return `<div class="dia">${dn[new Date(t+"T12:00").getDay()]}<b>${e}</b>${Math.round(d.daily.temperature_2m_max[i+1])}° / ${Math.round(d.daily.temperature_2m_min[i+1])}°</div>`}).join("");
+    el.innerHTML=`<span style="font-size:2rem">${emo}</span><div><div class="temp">${Math.round(c.temperature_2m)}°C</div><div class="det">${txt} · Viento ${Math.round(c.wind_speed_10m)} km/h · Humedad ${c.relative_humidity_2m}%</div></div><div class="dias">${dias}</div>`;
+  }catch(e){el.innerHTML=`<span class="det">No pudimos cargar el clima ahora. Probá de nuevo en unos minutos.</span>`}
+}
+
+/* ============ VISTAS ============ */
+const V = {};
+
+/* Lugares destacados: cada imagen es un recorte de la ilustración del sitio */
+const DESTACADOS = [
+  {id:"soleada", n:"Playa Soleada", tag:"Río", d:"El balneario más concurrido del centro.", pos:"52% 46%"},
+  {id:"viacrucis", n:"Cerro Vía Crucis", tag:"Montaña", d:"Subida a pie hasta la cruz. Ideal al atardecer.", pos:"97% 14%"},
+  {id:"capilla", n:"Capilla Vieja", tag:"Historia", d:"De 1784. Hoy es Museo de Arte Sacro.", pos:"26% 66%"},
+  {id:"santamonica", n:"Villa Santa Mónica", tag:"Sierras", d:"A 3 km, con pulpería de 1929.", pos:"0% 42%"}
+];
+/* Agenda del portal oficial de Turismo (las fechas exactas se publican cada año) */
+const AGENDA = [
+  {n:"Río y música", f:"Enero y febrero", l:"Balnearios y paradores", d:"Conciertos al aire libre junto al río. Gratis.", c:"#3AAFB9"},
+  {n:"Delicias de Pascuas", f:"Semana Santa", l:"Centro", d:"Repostería artesanal, chocolates y espectáculos para chicos.", c:"#FF9E1B"},
+  {n:"Sabores Serranos", f:"Invierno", l:"Frente al río", d:"Carnes asadas, locro y vinos de la región, con cocineros y productores locales.", c:"#FF7300"},
+  {n:"Fiesta de la Cerveza", f:"Octubre", l:"Balneario Santa Rita", d:"Tres jornadas de cerveza artesanal, comida centroeuropea y música junto al río.", c:"#93C01F"}
+];
+const tarjetasAgenda = () => AGENDA.map(e=>`<article class="evento" style="--c:${e.c}"><span class="cuando">${e.f}</span><h3>${e.n}</h3><p>${e.d}</p><span class="donde">📍 ${e.l}</span></article>`).join("");
+const INTERESES = [
+  ["rio","Río","ola","#3AAFB9"],["aventura","Aventura","cerro","#B8D435"],["familia","En familia","gente","#FF9E1B"],
+  ["cultura","Cultura","libro","#FFB25C"],["noche","Noche","luna","#7FD4DC"],["todo","Ver todo","todo","#E9E0CF"]
+];
+const ESCAPADAS = [
+  {n:"Día de paseo", b:"Venís y te volvés en el día.", noches:0, plan:1, c:"#3AAFB9", items:["Puentes y Capilla Vieja","Tarde de río en el centro","Merienda o cena en el centro"]},
+  {n:"Finde serrano", b:"Una noche para hacer río y cerro.", noches:1, plan:2, top:true, c:"#FF7300", items:["Todo lo del día de paseo","Vía Crucis al amanecer","Balneario Santa Rita","Una noche en cabaña"]},
+  {n:"Escapada de 3 días", b:"Para conocer el valle completo.", noches:2, plan:3, c:"#93C01F", items:["Centro histórico y río","Villa Santa Mónica y su pulpería","Excursión a otro pueblo del valle","Dos noches de alojamiento"]}
+];
+/* Por persona, viajando de a dos en cabaña */
+const precioEscapada = e => e.noches===0 ? COMIDA.medio.p+SALIDAS.algunas.p : (ALOJ.cabana.precio/2+COMIDA.medio.p+SALIDAS.algunas.p)*e.noches;
+
+V.inicio = () => `
+<section class="hero">
+  <div class="hero-fondo" role="img" aria-label="Ilustración en acuarela de Santa Rosa de Calamuchita: sierras en espiral, el río, el pueblo, el sol de Mayo, Santa Rosa de Lima y el cartel Las Malvinas son argentinas"></div>
+  <div class="envoltura hero-contenido">
+    <span class="bienvenida">Bienvenidos a</span>
+    <h1>Descubriendo Santa Rosa</h1>
+    <span class="linea-hero"></span>
+    <span class="lema">Corazón de Calamuchita · río, sierra e historia</span>
+    <div class="buscador solo-js" role="search">
+      <label for="buscar">¿Qué querés hacer o encontrar?</label>
+      <div class="campo-b">${ICON.buscar}<input id="buscar" type="search" autocomplete="off" placeholder="Ej: balneario, cabaña, historia…" aria-controls="resultados"></div>
+      <ul class="resultados" id="resultados" hidden></ul>
+      <div class="sugerencias">Probá: <button data-sug="río">río</button><button data-sug="cabaña">cabaña</button><button data-sug="comer">comer</button><button data-sug="emergencia">emergencia</button></div>
+    </div>
+  </div>
+  <span class="credito">Santa Rosa en acuarela</span>
+</section>
+
+<div class="envoltura accesos-wrap">
+  <div class="accesos" aria-label="Accesos directos">
+    <a class="acceso" style="--c:#0098A9" href="#mapa" data-ir="mapa"><span class="ic">${ICON.pin}</span><span><b>Mapa en vivo</b><span>Qué tenés cerca</span></span></a>
+    <a class="acceso" style="--c:#FF7300" href="${TURISMO.telLink}"><span class="ic">${ICON.tel}</span><span><b>Llamar a Turismo</b><span>${TURISMO.tel}</span></span></a>
+    <a class="acceso" style="--c:#93C01F" href="${TURISMO.wsLink}" target="_blank" rel="noopener"><span class="ic">${ICON.ws}</span><span><b>WhatsApp</b><span>Consultas rápidas</span></span></a>
+    <a class="acceso solo-js" style="--c:#FF9E1B" href="#tips" data-ir="tips"><span class="ic">${ICON.sol}</span><span><b>Clima ahora</b><span id="climaMini">Cargando…</span></span></a>
+  </div>
+</div>
+
+<section class="bloque" style="padding-bottom:12px">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">un toque y listo</span><h2>¿Qué tenés ganas de hacer?</h2></div></div>
+    <div class="intereses">
+      ${INTERESES.map(([k,t,i,c])=>`<a class="interes" style="--c:${c}" href="#divertirme" data-ir="divertirme" data-filtro-ir="${k}"><span class="ic">${ICON[i]}</span>${t}</a>`).join("")}
+    </div>
+  </div>
+</section>
+
+<section class="bloque">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">no te los podés perder</span><h2>Lugares imperdibles</h2></div><a class="enlace" href="#mapa" data-ir="mapa">Ver todos en el mapa ${ICON.flecha}</a></div>
+    <div class="lugares">
+      ${DESTACADOS.map(d=>`<article class="lugar">
+        <div class="recorte" style="background-position:${d.pos}" role="img" aria-label="${d.n}"><span class="pill">${d.tag}</span></div>
+        <div class="lugar-cuerpo"><h3>${d.n}</h3><p>${d.d}</p>
+          <div class="acciones"><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="${d.id}">Mapa</a><a class="btn" href="${comoLlegar(lugar(d.id).ll)}" target="_blank" rel="noopener">Ir ${ICON.ruta}</a></div></div>
+      </article>`).join("")}
+    </div>
+  </div>
+</section>
+
+<section class="bloque bloque-papel">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">¿cuánto tiempo tenés?</span><h2>Elegí tu escapada</h2></div><a class="enlace" href="#hospedajes" data-ir="hospedajes">Calcular mi presupuesto ${ICON.flecha}</a></div>
+    <div class="planes">
+      ${ESCAPADAS.map(e=>`<article class="plan ${e.top?"top":""}" style="--c:${e.c}">${e.top?'<span class="cinta">El más elegido</span>':""}
+        <h3>${e.n}</h3><p class="nota" style="margin:0">${e.b}</p>
+        <div class="precio">$${Math.round(precioEscapada(e)).toLocaleString("es-AR")}<small>estimado por persona, de a dos</small></div>
+        <ul>${e.items.map(x=>`<li>${x}</li>`).join("")}</ul>
+        <a class="btn ${e.top?"":"sec"}" href="#tips" data-ir="tips" data-plan-ir="${e.plan}">Ver recorrido ${ICON.flecha}</a>
+      </article>`).join("")}
+    </div>
+  </div>
+</section>
+
+<section class="bloque" style="padding-top:0">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">todo el año pasa algo</span><h2>Agenda de Santa Rosa</h2></div><a class="enlace" href="https://www.instagram.com/turismostarosa/" target="_blank" rel="noopener">Fechas al día en Instagram ${ICON.flecha}</a></div>
+    <div class="agenda">${tarjetasAgenda()}</div>
+  </div>
+</section>
+
+<section class="bloque">
+  <div class="envoltura">
+    <div class="titulo-sec"><div><span class="mano">preguntá lo que quieras</span><h2>¿Qué querés saber?</h2></div></div>
+    <div class="preguntas">${PREGUNTAS.map(tarjetaPregunta).join("")}</div>
+  </div>
+</section>
+
+<section class="bloque" style="padding-top:0">
+  <div class="envoltura">
+    <div class="datos-res">
+      <div class="datos">
+        <div class="dato"><b>9</b><span>balnearios</span></div>
+        <div class="dato"><b>1784</b><span>Capilla Vieja</span></div>
+        <div class="dato"><b>1914</b><span>Puente de Hierro</span></div>
+        <div class="dato"><b>96</b><span>km de Córdoba</span></div>
+      </div>
+      <a class="residente-cta" href="#residente" data-ir="residente">
+        <span class="play">${ICON.play}</span>
+        <span class="mano">¿sos de la zona?</span>
+        <b>Si sos residente y te quedaste con ganas de saber más, este video es para vos.</b>
+      </a>
+    </div>
+  </div>
+</section>`;
+
+V.inicio.despues = () => {
+  iniciarBuscador();
+  cargarClima().then(d=>{const c=d.current,[t,e]=COD[c.weather_code]||["",""];const m=$("#climaMini");if(m)m.textContent=`${e} ${Math.round(c.temperature_2m)}°C · ${t}`})
+    .catch(()=>{const m=$("#climaMini");if(m)m.textContent="Ver pronóstico"});
+};
+
+/* --- Divertirme --- */
+const ACTIV = [
+  {n:"Día de río en los balnearios", t:"rio", d:"Sobre el río Santa Rosa hay unos nueve balnearios con parrillas y sombra. Piedras Rosadas, Santa Rita y Ruphay son los más familiares; en el centro están El Remanso, El Puchuquí, Puente Colgante y Playa Soleada.", lug:"soleada"},
+  {n:"Subir al Cerro Vía Crucis", t:"aventura", d:"Caminata por camino de piedras y espinillos hasta la gran cruz de madera. Andá antes del atardecer: la vista del pueblo es el premio.", lug:"viacrucis"},
+  {n:"Reserva La Cascada", t:"aventura", d:"Sendero de sierra con aroma a espinillo que llega a una cascada escondida entre rocas. Llevá calzado con buen agarre, agua y gorra.", lug:"cascada"},
+  {n:"Cabalgatas y bicicleta", t:"aventura", d:"Salidas a caballo por paisajes serranos y mountain bike por senderos de bosque, río y cerro.", lug:"rinconada"},
+  {n:"Kayak y pesca deportiva", t:"rio", d:"Navegación en kayak y pesca en los ríos del valle. Consultá guías y permisos en la Oficina de Turismo.", lug:"rinconada"},
+  {n:"Miradores serranos", t:"aventura", d:"Puntos altos con vista a todo el valle de Calamuchita. Los mejores para ver el atardecer detrás de las cumbres.", lug:"viacrucis"},
+  {n:"Astroturismo", t:"noche", d:"Observación de estrellas en uno de los cielos más limpios del valle. Consultá fechas en la Oficina de Turismo.", lug:"infocentro"},
+  {n:"Feria de Artesanos", t:"cultura", d:"Cerámica, madera, textiles, cuero, joyería y productos regionales hechos en la zona.", lug:"infocentro"},
+  {n:"Salir de noche", t:"noche", d:"En temporada hay espectáculos, confiterías, pubs y boliches. El centro concentra casi todo en pocas cuadras.", lug:"remanso"},
+  {n:"Paseo por los puentes", t:"familia", d:"Del Puente de Hierro (1914) al Puente Colgante caminando por la costanera. Apto para cochecitos y abuelos.", lug:"hierro"},
+  {n:"Capilla Vieja y Museo de Arte Sacro", t:"cultura", d:"El edificio más antiguo del pueblo. Ideal para un día nublado.", lug:"capilla"},
+  {n:"Pulpería y truco en Santa Mónica", t:"cultura", d:"A 3 km. En la Pulpería Don Segundo Sombra se juega al truco en ronda, apoyados en la barra.", lug:"santamonica"},
+  {n:"Excursiones por el valle", t:"familia", d:"Santa Rosa es buena base: Villa General Belgrano, La Cumbrecita y Yacanto quedan cerca. Consultá excursiones en la Oficina de Turismo.", lug:"infocentro"},
+  {n:"Fiestas y eventos", t:"familia", d:"Río y música en verano, Delicias de Pascuas, Sabores Serranos en invierno y la Fiesta de la Cerveza en octubre.", lug:"infocentro", agenda:true}
+];
+const CAT_ACT={todo:"Todo",rio:"Río",aventura:"Aventura",familia:"En familia",cultura:"Cultura",noche:"Noche"};
+function tarjetasAct(f){return ACTIV.filter(a=>f==="todo"||a.t===f).map(a=>`<article class="card"><span class="pill">${CAT_ACT[a.t]}</span><h3>${a.n}</h3><p>${a.d}</p><div class="acciones">${a.agenda?`<a class="btn" href="#agenda" data-ir="agenda">Ver agenda ${ICON.flecha}</a>`:`<a class="btn" href="${comoLlegar(lugar(a.lug).ll)}" target="_blank" rel="noopener">Cómo llegar ${ICON.ruta}</a><a class="btn sec" href="#mapa" data-ir="mapa" data-foco="${a.lug}">Mapa</a>`}</div></article>`).join("")}
+V.divertirme = () => `<div class="envoltura vista">
+  ${cabecera("¿Qué puedo hacer si quiero divertirme?","Elegí lo que te gusta. Cada plan tiene el botón para ir directo.")}
+  <div class="chips solo-js" role="group" aria-label="Filtrar actividades">${Object.entries(CAT_ACT).map(([k,v],i)=>`<button class="chip" data-filtro="${k}" aria-pressed="${i===0}">${v}</button>`).join("")}</div>
+  <div class="grilla" id="listaAct">${tarjetasAct("todo")}</div>
+  ${seguir("divertirme")}
+</div>`;
+V.divertirme.despues = (foco,o={}) => {
+  const pintar=f=>{$("#listaAct").innerHTML=tarjetasAct(f);document.querySelectorAll("[data-filtro]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.filtro===f))};
+  pintar(CAT_ACT[o.filtro]?o.filtro:"todo");
+  document.querySelectorAll("[data-filtro]").forEach(b=>b.onclick=()=>pintar(b.dataset.filtro));
+};
+
+/* --- Agenda --- */
+V.agenda = () => `<div class="envoltura vista">
+  ${cabecera("Agenda de Santa Rosa","Las fiestas y eventos de cada temporada. Las fechas exactas se publican cada año.")}
+  <div class="agenda">${tarjetasAgenda()}</div>
+  <div class="card" style="margin-top:16px"><h3>Feria de Artesanos</h3><p>Todo el año: cerámica, madera, textiles, cuero, joyería y productos regionales.</p><div class="acciones"><a class="btn turq" href="https://www.instagram.com/turismostarosa/" target="_blank" rel="noopener">Ver fechas en Instagram</a><a class="btn sec" href="https://turismo.santarosamuni.com/agenda" target="_blank" rel="noopener">Agenda oficial</a></div></div>
+  ${seguir("agenda")}
+</div>`;
+
+/* --- Historia (todo visible, sin clics) --- */
+const HITOS = [
+  {a:"Antes", t:"Los primeros habitantes", d:"Antes de la llegada de los españoles, el valle fue hogar de pueblos cazadores y recolectores y de los comechingones, que dejaron morteros y pinturas en la piedra."},
+  {a:"1528", t:"El primer español", d:"Francisco César cruza el Valle de Calamuchita buscando la ciudad del legendario Rey Blanco."},
+  {a:"1575", t:"Fecha de fundación", d:"No existe un acta de fundación. Se toma 1575 como el comienzo, con las primeras estancias españolas y la llegada de los jesuitas."},
+  {a:"1642", t:"La merced Carranza", d:"Las tierras pasan a Sebastián Carranza y de la Torre, un linaje muy ligado a la historia del pueblo."},
+  {a:"1700", t:"La capilla dominica", d:"Los dominicos levantan una capilla en honor a Santa Rosa de Lima. De ahí sale la primera parte del nombre."},
+  {a:"1784", t:"La Capilla Vieja", d:"Se completa la capilla que hoy conocemos como Capilla Vieja, centro espiritual y social del futuro pueblo. Hoy funciona allí el Museo de Arte Sacro."},
+  {a:"1877", t:"La nueva iglesia", d:"La capilla es reconstruida y se dona el predio para la Iglesia de Santa Rosa."},
+  {a:"1914", t:"Llega el Puente de Hierro", d:"Se instala el puente traído de Europa, parte del antiguo camino. Por él pasaron tropas y viajeros."},
+  {a:"1935", t:"Nace el pueblo", d:"Se lotea la vieja Estancia Santa Rosa, que había sido posta, primer hotel, correo y hasta escuela. Ahí empieza el pueblo moderno."}
+];
+const COLORES_LINEA=["#FF7300","#FF9E1B","#B8D435","#3AAFB9"];
+V.historia = () => `<div class="envoltura vista">
+  ${cabecera("Todo sobre la historia de Santa Rosa","De los comechingones al pueblo de hoy, en una sola línea de tiempo.")}
+  <ol class="linea">${HITOS.map((h,i)=>`<li class="hito" style="--c:${COLORES_LINEA[i%4]}"><span class="anio">${h.a}</span><div class="caja"><h3>${h.t}</h3><p>${h.d}</p></div></li>`).join("")}</ol>
+  <h2 class="subtitulo">¿De dónde viene “Calamuchita”?</h2>
+  <p style="max-width:60ch;margin:0">Viene de la voz indígena “Ctalamochita”. Se forma con tres partes, y juntas quieren decir <b>abundancia de talas y molles</b>, dos árboles nativos.</p>
+  <div class="nombre-origen"><div><b>Ctala</b>tala</div><div><b>Mochi</b>molle</div><div><b>-ita</b>abundancia</div></div>
+  ${seguir("historia")}
+</div>`;
+
+/* --- QRs y videos --- */
+const VIDEOS = [
+  {n:"Recorrido por el río", lug:"soleada"},
+  {n:"Historia de la Capilla Vieja", lug:"capilla"},
+  {n:"Subida al Vía Crucis", lug:"viacrucis"},
+  {n:"Los puentes de Santa Rosa", lug:"hierro"},
+  {n:"Villa Santa Mónica", lug:"santamonica"},
+  {n:"Dónde pedir información", lug:"inforegional"}
+];
+V.qrs = () => `<div class="envoltura vista">
+  ${cabecera("QRs y videos de todo lo que quieras saber","Cada lugar tiene su video y su QR. Escaneá el código con la cámara del celu para abrir cómo llegar.")}
+  <div class="grilla">${VIDEOS.map((v,i)=>`<article class="card"><div class="foto">▶ Espacio para tu video<br>“${v.n}”</div><h3>${v.n}</h3><div style="display:flex;gap:14px;align-items:center"><div class="qr" id="qr${i}"></div><div><p class="nota" style="margin:0 0 8px">Escaneá para abrir la ubicación.</p><a class="enlace" href="${comoLlegar(lugar(v.lug).ll)}" target="_blank" rel="noopener">o tocá acá ${ICON.flecha}</a></div></div></article>`).join("")}</div>
+  ${seguir("qrs")}
+</div>`;
+V.qrs.despues = () => VIDEOS.forEach((v,i)=>{try{new QRCode($("#qr"+i),{text:comoLlegar(lugar(v.lug).ll),width:232,height:232,colorDark:"#1D1D1B",colorLight:"#ffffff"})}catch(e){$("#qr"+i).textContent="QR"}});
+
+/* --- Contacto --- */
+const CONTACTOS = [
+  {n:"Oficina de Informes Centro", dir:"Córdoba 144, Centro", tel:"03546 429652", extra:"También 03546 429654 · infoturismo@municipiosantarosa.gob.ar", ws:"3546 528914", lug:"infocentro"},
+  {n:"Oficina de Informes Regional", dir:"Av. Fuerza Aérea y Ruta Pcial. N° 5", tel:"3546 571272", extra:"Temporada baja 10 a 16 h · Temporada alta 8 a 20 h", lug:"inforegional"},
+  {n:"Municipalidad", dir:"Córdoba 242", tel:"03546 429650", extra:"Lunes a viernes de 8 a 13 h"}
+];
+V.contacto = () => `<div class="envoltura vista">
+  ${cabecera("Contacto de la Oficina de Turismo","Llamá o escribí con un toque. Para consultas, excursiones y la agenda del finde.")}
+  <div class="grilla">
+    ${CONTACTOS.map(c=>`<article class="card"><span class="pill">Turismo</span><h3>${c.n}</h3><p>${c.dir}</p><div class="contacto-num">${c.tel}</div><p class="nota">${c.extra}</p><div class="acciones"><a class="btn" href="${telLink(c.tel)}">${ICON.tel} Llamar</a>${c.ws?`<a class="btn turq" href="https://wa.me/549${c.ws.replace(/\D/g,"")}" target="_blank" rel="noopener">${ICON.ws} WhatsApp</a>`:""}${c.lug?`<a class="btn sec" href="${comoLlegar(lugar(c.lug).ll)}" target="_blank" rel="noopener">Cómo llegar</a>`:""}<button class="btn sec solo-js" data-copiar="${c.tel}">Copiar</button></div></article>`).join("")}
+    <article class="card"><span class="pill">Redes</span><h3>Seguinos en Instagram</h3><div class="contacto-num">@turismostarosa</div><p>Agenda de eventos, fiestas y novedades del día a día.</p><div class="acciones"><a class="btn turq" href="https://www.instagram.com/turismostarosa/" target="_blank" rel="noopener">Abrir Instagram</a></div></article>
+    <article class="card"><span class="pill">Emergencias</span><h3>Teléfonos útiles</h3><p><b>Policía:</b> <a href="tel:101">101</a> · <b>Salud:</b> <a href="tel:107">107</a></p><p><b>Bomberos:</b> <a href="tel:100">100</a> · <a href="tel:+543546421750">03546 421750</a></p><p><b>Hospital Regional:</b> <a href="tel:+543546426683">03546 426683</a></p></article>
+  </div>
+  <p class="nota" style="margin-top:16px">Datos del portal oficial de Turismo de Santa Rosa de Calamuchita. Confirmalos antes de publicar.</p>
+  ${seguir("contacto")}
+</div>`;
+
+/* --- Quiénes somos --- */
+V.nosotros = () => `<div class="envoltura vista">
+  ${cabecera("¿Quiénes somos?","")}
+  <div class="calc">
+    <div>
+      <p style="font-size:1.15rem;margin-top:0">[Escribí acá quiénes son: el equipo o la institución detrás de “Descubriendo Santa Rosa”.]</p>
+      <p>[Contá por qué hicieron esta guía, para quién es y qué los une con Santa Rosa. Dos o tres oraciones alcanzan.]</p>
+      <p>[Sumá un contacto propio o un mail para sugerencias.]</p>
+    </div>
+    <div class="foto">Espacio para foto del equipo</div>
+  </div>
+  ${seguir("nosotros")}
+</div>`;
+
+/* --- Hospedajes, picar y presupuestos (todo en una sola pantalla) --- */
+/* Puntajes y opiniones de TripAdvisor (consultados en noviembre 2026). Actualizalos cada tanto. */
+const HOSP = [
+  {n:"Posada Del Castor", t:"hotel", tl:"Posada", r:5.0, o:39, d:"Desayunos destacados, privacidad y cerca de los comercios."},
+  {n:"La Matilda", t:"hotel", tl:"Alojamiento", r:4.9, o:51, d:"Desayuno completo y habitaciones amplias."},
+  {n:"Posada La Rosita", t:"hotel", tl:"Posada", r:4.8, o:54, d:"Desayuno incluido, pileta y jardín. Muy tranquila."},
+  {n:"Posada El Potrerillo", t:"hotel", tl:"Posada", r:4.7, o:47, d:"Junto al río y muy tranquila. No admite niños."},
+  {n:"Jazmines del Río Suites", t:"hotel", tl:"Suites", r:4.7, o:16, d:"Balcones sobre la costanera."},
+  {n:"Hotel Ypora", t:"hotel", tl:"Hotel", r:4.3, o:46, d:"Renovado, con desayuno, parque con quinchos y estacionamiento amplio."},
+  {n:"Arcos del Río", t:"hotel", tl:"Hotel", r:4.2, o:122, d:"Desayuno incluido y estacionamiento privado."},
+  {n:"Hotel Gloria", t:"hotel", tl:"Hotel", r:4.2, o:41, d:"Desayuno, piscina y vista a las sierras. A 100 m del balneario El Remanso."},
+  {n:"Complejo Valle del Sol", t:"cabana", tl:"Complejo", r:4.5, o:243, d:"Varias piletas, desayuno y actividades para chicos. El más opinado."},
+  {n:"Cabañas Verde y Blanco", t:"cabana", tl:"Cabañas", r:4.7, o:23, d:"Desayuno incluido y pileta."},
+  {n:"Complejo Vacacional Coovaeco", t:"cabana", tl:"Complejo", r:4.4, o:107, d:"Cabañas, restaurante y pileta climatizada con vista al arroyo."},
+  {n:"El Rodeo Apart Cabañas & Suites", t:"cabana", tl:"Apart", r:4.2, o:45, d:"Frente al río, con un arroyo dentro del predio."},
+  {n:"Eiru Hostel", t:"hostel", tl:"Hostel", r:4.9, o:7, d:"Muy buena atención. Apto para grupos."},
+  {n:"Hostel Avetaia", t:"hostel", tl:"Hostel", r:4.9, o:7, d:"Desayuno incluido e instalaciones nuevas."},
+  {n:"Hostel Tinktinkie", t:"hostel", tl:"Hostel", r:4.6, o:16, d:"Desayuno incluido y trato cercano de los dueños."},
+  {n:"La Olla Complejo Turístico", t:"camping", tl:"Camping", r:4.7, o:29, d:"Parrilleros, despensa y baños limpios."}
+];
+const CAT_HOSP = {todo:"Todos", hotel:"Hotel o posada", cabana:"Cabañas", hostel:"Hostel", camping:"Camping"};
+const PICAR = [
+  {n:"Nonna Bertina", cat:"pastas", tl:"Italiana", r:4.6, o:232, pr:"$$–$$$", d:"Cocina italiana toscana. Puede demorar, pero vale la espera."},
+  {n:"La Vaquita", cat:"parrilla", tl:"Cocina argentina", r:4.5, o:299, pr:"$$–$$$", d:"Restaurante familiar. Famosa su tortilla rellena.", lug:"vaquita"},
+  {n:"Todo Pastas", cat:"pastas", tl:"Pastas caseras", r:4.3, o:57, pr:"$$–$$$", d:"El lugar para comer pastas caseras."},
+  {n:"Pizza Siete", cat:"pastas", tl:"Pizzería", r:4.0, o:165, pr:"$", d:"Pizza rica y económica."},
+  {n:"La Pulpería de los Ferreyra", cat:"parrilla", tl:"Parrilla", r:3.9, o:487, pr:"$$–$$$", d:"La más visitada. Ambiente de época y flan casero con dulce de leche.", lug:"ferreyra"},
+  {n:"La 5 Parrilla", cat:"parrilla", tl:"Parrilla", r:4.0, o:39, pr:"$$–$$$", d:"Buena parrilla, también con pescados."},
+  {n:"Cantina de Montaña", cat:"vista", tl:"Parador serrano", r:4.1, o:24, pr:"$$–$$$", d:"En la entrada al sendero de La Cascada, con vista al pueblo.", lug:"cascada"},
+  {n:"El Chañar Resto Bar", cat:"bares", tl:"Bar de vinos", r:4.3, o:15, pr:"$", d:"Cocina italiana y buenos vinos."},
+  {n:"Piedra Madre", cat:"bares", tl:"Pub", r:4.3, o:16, pr:"$$–$$$", d:"Cocina de fusión y tragos."},
+  {n:"La Calaca", cat:"bares", tl:"Mexicana", r:4.4, o:9, pr:"$$–$$$", d:"Una opción distinta en el valle."},
+  {n:"Fábrica de Chacinados El Campito", cat:"regional", tl:"Delicatessen", r:4.4, o:14, pr:"$$–$$$", d:"Fiambres y chacinados para armar la picada."},
+  {n:"Moe Moeea", cat:"regional", tl:"Cocina casera", r:4.0, o:25, pr:"$$–$$$", d:"Donde come la gente del lugar."}
+];
+const CAT_PICAR = {todo:"Todo", parrilla:"Parrilla", pastas:"Pastas y pizza", bares:"Bares", regional:"Regional", vista:"Con vista"};
+const enMapa = n => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(n+" Santa Rosa de Calamuchita")}`;
+const estrellas = (r,o) => `<div class="puntaje"><span class="estrella">★</span><b>${r.toFixed(1).replace(".",",")}</b><span>${o} opiniones</span></div>`;
+
+/* Precios de referencia por noche.
+   Cabaña: promedio publicado en AlquilerArgentina ($75.900). Hotel: precio "desde" en TripAdvisor ($50.459).
+   Camping, comidas y salidas: ESTIMADOS, actualizalos con datos reales. */
+const ALOJ = {
+  camping:{n:"Camping", precio:15000, cap:1, unidad:"persona"},
+  hotel:{n:"Hotel o posada", precio:50459, cap:2, unidad:"habitación"},
+  cabana:{n:"Cabaña o depto", precio:75900, cap:4, unidad:"cabaña"}
+};
+const COMIDA = {eco:{n:"Cocino yo", p:12000}, medio:{n:"Intermedio", p:25000}, alto:{n:"Salgo siempre", p:40000}};
+const SALIDAS = {nada:{n:"Río y caminatas", p:0}, algunas:{n:"Algunas salidas", p:10000}, muchas:{n:"A full", p:25000}};
+let calcEstado={pers:2,dias:2,aloj:"cabana",comida:"medio",extras:"algunas"};
+const GRUPOS = {aloj:ALOJ, comida:COMIDA, extras:SALIDAS};
+const tarjetaHosp = h => `<article class="card"><span class="pill">${h.tl}</span><h3>${h.n}</h3>${estrellas(h.r,h.o)}<p>${h.d}</p><div class="acciones"><a class="btn" href="${enMapa(h.n)}" target="_blank" rel="noopener">Ver y contactar ${ICON.flecha}</a></div></article>`;
+const tarjetaPicar = p => `<article class="card"><span class="pill">${p.tl}</span><h3>${p.n}</h3>${estrellas(p.r,p.o)}<p>${p.d}</p><p class="nota">Precio: <span class="precio-nivel">${p.pr}</span></p><div class="acciones"><a class="btn" href="${enMapa(p.n)}" target="_blank" rel="noopener">Cómo llegar ${ICON.ruta}</a>${p.lug?`<a class="btn sec" href="#mapa" data-ir="mapa" data-foco="${p.lug}">Mapa</a>`:""}</div></article>`;
+const ordenar = arr => [...arr].sort((a,b)=>b.r-a.r||b.o-a.o);
+
+V.hospedajes = () => `<div class="envoltura vista">
+  ${cabecera("Hospedajes, lugares para picar y presupuestos","Calculá cuánto gastás, elegí dónde dormir y dónde comer, todo en esta pantalla.")}
+  <h2 class="subtitulo" style="margin-top:0">Calculá tu viaje</h2>
+  <div class="calc">
+    <div>
+      <div class="campo"><label for="cPers">Personas</label><div class="rango"><input type="range" id="cPers" min="1" max="10" value="2"><output id="oPers">2</output></div></div>
+      <div class="campo"><label for="cDias">Noches</label><div class="rango"><input type="range" id="cDias" min="1" max="14" value="2"><output id="oDias">2</output></div></div>
+      ${[["aloj","Alojamiento"],["comida","Comidas"],["extras","Actividades"]].map(([k,t])=>`<div class="campo"><span style="font-weight:800">${t}</span><div class="segmentos" role="group" aria-label="${t}">${Object.entries(GRUPOS[k]).map(([v,o])=>`<button class="chip" data-seg="${k}" data-val="${v}" aria-pressed="${calcEstado[k]===v}">${o.n}</button>`).join("")}</div></div>`).join("")}
+      <p class="nota solo-sin-js">La calculadora funciona al abrir la página en el navegador.</p>
+    </div>
+    <div class="total" aria-live="polite">
+      <div>Total estimado del viaje</div>
+      <div class="num" id="totNum">$0</div>
+      <div id="totPP"></div>
+      <table id="totTabla"></table>
+      <p class="nota">Cabaña: promedio de $75.900 por noche (AlquilerArgentina). Hotel: desde $50.459 por noche (TripAdvisor). Camping, comidas y actividades son estimados. Confirmá siempre con cada lugar.</p>
+    </div>
+  </div>
+
+  <h2 class="subtitulo">Dónde dormir</h2>
+  <div class="chips solo-js" role="group" aria-label="Tipo de alojamiento">${Object.entries(CAT_HOSP).map(([k,v],i)=>`<button class="chip" data-fh="${k}" aria-pressed="${i===0}">${v}</button>`).join("")}</div>
+  <div class="grilla" id="listaHosp">${ordenar(HOSP).map(tarjetaHosp).join("")}</div>
+  <div class="card" style="margin-top:16px;flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px"><div style="flex:1;min-width:220px"><h3>¿Buscás más opciones?</h3><p>La Municipalidad tiene más de 100 alojamientos habilitados, con capacidad, servicios y distancia al río.</p></div><a class="btn turq" href="https://turismo360.santarosamuni.com/" target="_blank" rel="noopener">Ver alojamientos habilitados</a></div>
+
+  <h2 class="subtitulo">Para picar</h2>
+  <p style="margin:0 0 14px;color:var(--tinta-suave)">Para probar: asado a la estaca, empanadas cortadas a cuchillo, cerveza artesanal del valle y alfajores de Calamuchita.</p>
+  <div class="chips solo-js" role="group" aria-label="Tipo de comida">${Object.entries(CAT_PICAR).map(([k,v],i)=>`<button class="chip" data-fp="${k}" aria-pressed="${i===0}">${v}</button>`).join("")}</div>
+  <div class="grilla" id="listaPicar">${ordenar(PICAR).map(tarjetaPicar).join("")}</div>
+  <p class="fuente">Puntajes y opiniones de <a href="https://www.tripadvisor.com.ar/Hotels-g312773-Santa_Rosa_de_Calamuchita_Province_of_Cordoba_Central_Argentina-Hotels.html" target="_blank" rel="noopener">TripAdvisor</a>, consultados en noviembre de 2026. $ = económico · $$–$$$ = precio medio.</p>
+  ${seguir("hospedajes")}
+</div>`;
+V.hospedajes.despues = (foco,o={}) => {
+  const f=n=>"$"+Math.round(n).toLocaleString("es-AR");
+  $("#cPers").value=calcEstado.pers; $("#cDias").value=calcEstado.dias;
+  const calc=()=>{
+    const p=calcEstado.pers=+$("#cPers").value, d=calcEstado.dias=+$("#cDias").value;
+    $("#oPers").value=p;$("#oDias").value=d;
+    const al=ALOJ[calcEstado.aloj], unidades=Math.ceil(p/al.cap);
+    const a=al.precio*unidades*d, c=COMIDA[calcEstado.comida].p*p*d, e=SALIDAS[calcEstado.extras].p*p*d, t=a+c+e;
+    const plural=al.unidad==="habitación"?"habitaciones":al.unidad+"s";
+    const etiqueta=`${unidades} ${unidades>1?plural:al.unidad}`;
+    $("#totNum").textContent=f(t);$("#totPP").textContent=`${f(t/p)} por persona · ${d} noche${d>1?"s":""}`;
+    $("#totTabla").innerHTML=`<tr><td>Alojamiento (${etiqueta})</td><td>${f(a)}</td></tr><tr><td>Comidas</td><td>${f(c)}</td></tr><tr><td>Actividades</td><td>${f(e)}</td></tr>`;
+  };
+  document.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{calcEstado[b.dataset.seg]=b.dataset.val;document.querySelectorAll(`[data-seg="${b.dataset.seg}"]`).forEach(x=>x.setAttribute("aria-pressed",x===b));calc()});
+  $("#cPers").oninput=calc; $("#cDias").oninput=calc; calc();
+  const filtrar=(attr,lista,datos,campo,tarjeta)=>document.querySelectorAll(`[${attr}]`).forEach(b=>b.onclick=()=>{const k=b.getAttribute(attr);document.querySelectorAll(`[${attr}]`).forEach(x=>x.setAttribute("aria-pressed",x===b));$(lista).innerHTML=ordenar(datos.filter(x=>k==="todo"||x[campo]===k)).map(tarjeta).join("")});
+  filtrar("data-fh","#listaHosp",HOSP,"t",tarjetaHosp);
+  filtrar("data-fp","#listaPicar",PICAR,"cat",tarjetaPicar);
+  if(o.fh){const b=document.querySelector(`[data-fh="${o.fh}"]`);if(b)b.click()}
+  if(o.cat){const b=document.querySelector(`[data-fp="${o.cat}"]`);if(b){b.click();setTimeout(()=>$("#listaPicar").scrollIntoView({behavior:"smooth",block:"start"}),50)}}
+};
+
+/* --- Tips --- */
+const TIPS = [
+  "Traé protector solar, gorra y agua: el sol serrano pega fuerte.",
+  "Zapatillas cómodas para el Vía Crucis y los senderos.",
+  "Llevá efectivo: en algunos balnearios y ferias no hay posnet.",
+  "En verano reservá el alojamiento con anticipación.",
+  "Si suenan las sirenas en los balnearios, salí del agua: es la alerta de crecida del río.",
+  "El acampe libre está prohibido: usá los campings habilitados.",
+  "Llevate la basura, no tires colillas y no hagas fuego fuera de las parrillas.",
+  "Abrigo para la noche: refresca aun en verano.",
+  "Pasá por la Oficina de Informes para la agenda de la semana."
+];
+const PLANES = {
+  1:[["Mañana","Paseo por los puentes y la Capilla Vieja"],["Tarde","Balneario en el centro"],["Noche","Cena en el centro"]],
+  2:[["Día 1","Puentes, Capilla Vieja y río"],["Día 2","Vía Crucis temprano, tarde en Santa Rita y atardecer"]],
+  3:[["Día 1","Centro histórico y río"],["Día 2","Vía Crucis y Villa Santa Mónica"],["Día 3","Excursión por el valle (Villa General Belgrano o La Cumbrecita)"]]
+};
+function tarjetasPlan(n){return PLANES[n].map(([a,b])=>`<div class="card"><span class="pill">${a}</span><p style="color:var(--tinta)">${b}</p></div>`).join("")}
+V.tips = () => `<div class="envoltura vista">
+  ${cabecera("Tips por si venís a recorrer unos días","El clima, tu recorrido y una lista para no olvidarte nada.")}
+  ${htmlClima()}
+  <div class="calc" style="margin-top:22px">
+    <div><h2 class="subtitulo" style="margin-top:0">Armá tu recorrido</h2>
+      <div class="chips solo-js" role="group" aria-label="Cantidad de días">${[1,2,3].map(n=>`<button class="chip" data-plan="${n}" aria-pressed="${n===1}">${n} día${n>1?"s":""}</button>`).join("")}</div>
+      <div id="plan" class="grilla" style="grid-template-columns:1fr">${tarjetasPlan(1)}</div>
+    </div>
+    <div><h2 class="subtitulo" style="margin-top:0">Cómo llegar</h2>
+      <div class="card" style="margin-bottom:6px"><p><b>Desde Córdoba:</b> 96 km por la Ruta Provincial 5, pasando por el dique Los Molinos.</p><p><b>Desde Buenos Aires:</b> unos 700 km por la RN 9 hasta Río Segundo y después RP 13 y RP 5.</p><div class="acciones"><a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=Santa+Rosa+de+Calamuchita,+Córdoba" target="_blank" rel="noopener">Abrir ruta ${ICON.ruta}</a></div></div>
+      <h2 class="subtitulo">Antes de salir</h2>${TIPS.map((t,i)=>`<label class="check"><input type="checkbox" id="tip${i}" data-tip="${i}"><span>${t}</span></label>`).join("")}<p class="nota solo-js">Lo que marques queda guardado en este dispositivo.</p></div>
+  </div>
+  ${seguir("tips")}
+</div>`;
+V.tips.despues = (foco,o={}) => {
+  pintarClima();
+  const hechos=leer("tips",[]);
+  document.querySelectorAll("[data-tip]").forEach(c=>{c.checked=hechos.includes(+c.dataset.tip);c.onchange=()=>{guardar("tips",[...document.querySelectorAll("[data-tip]:checked")].map(x=>+x.dataset.tip))}});
+  const plan=n=>{$("#plan").innerHTML=tarjetasPlan(n);document.querySelectorAll("[data-plan]").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.plan===n))};
+  document.querySelectorAll("[data-plan]").forEach(b=>b.onclick=()=>plan(+b.dataset.plan));
+  plan(PLANES[o.plan]?o.plan:1);
+};
+
+/* --- Team montaña o río (quiz) --- */
+const QUIZ = [
+  {q:"Es sábado a la mañana. ¿Qué te dan ganas de hacer?", o:[["Caminar hasta un mirador","m"],["Tirarme al sol al lado del agua","r"],["Un poco de cada cosa","a"]]},
+  {q:"¿Qué no puede faltar en tu mochila?", o:[["Zapatillas y campera","m"],["Malla, toalla y reposera","r"],["Mate, siempre","a"]]},
+  {q:"¿Cuál es tu sonido favorito?", o:[["El viento en la sierra","m"],["El agua corriendo entre piedras","r"],["Una guitarreada","a"]]},
+  {q:"¿Cómo preferís el atardecer?", o:[["Desde arriba del cerro","m"],["Con los pies en el río","r"],["Con un asado, donde sea","a"]]},
+  {q:"¿Con quién venís?", o:[["Con amigos aventureros","m"],["Con la familia y los chicos","r"],["Con todos","a"]]}
+];
+V.team = () => `<div class="envoltura vista">
+  ${cabecera("¿Team montaña o río?","Cinco preguntas, un toque cada una. Spoiler: se valen los dos.")}
+  <div class="quiz" id="quiz"><p class="solo-sin-js" style="margin:0">El test funciona al abrir la página en el navegador. Mientras tanto, mirá <a href="#divertirme">todo lo que podés hacer</a>.</p></div>
+  ${seguir("team")}
+</div>`;
+V.team.despues = () => {
+  let i=0, pts={m:0,r:0};
+  const paso=()=>{
+    if(i>=QUIZ.length) return fin();
+    const p=QUIZ[i];
+    $("#quiz").innerHTML=`<div class="barra-prog"><i style="width:${i/QUIZ.length*100}%"></i></div><span class="pill">Pregunta ${i+1} de ${QUIZ.length}</span><h2 style="font-size:1.4rem;margin-top:10px">${p.q}</h2><div class="opciones">${p.o.map(([t,v])=>`<button class="opcion" data-v="${v}">${t}</button>`).join("")}</div>`;
+    document.querySelectorAll(".opcion").forEach(b=>b.onclick=()=>{const v=b.dataset.v;if(v==="a"){pts.m++;pts.r++}else pts[v]+=2;i++;paso()});
+  };
+  const fin=()=>{
+    const tot=pts.m+pts.r||1, pm=Math.round(pts.m/tot*100), pr=100-pm;
+    const gana=pm>55?"montana":pr>55?"rio":"ambos";
+    const R={montana:["¡Sos Team Montaña! ⛰️","Lo tuyo es el Cerro Vía Crucis al atardecer y los caminos hacia Villa Santa Mónica.",["viacrucis","santamonica"]],
+             rio:["¡Sos Team Río! 🌊","Tu lugar son los balnearios: Santa Rita para relajar, Playa Soleada para el movimiento.",["santarita","soleada"]],
+             ambos:["¡Sos de los dos! ⛰️🌊","Mañana al cerro, tarde al río. Santa Rosa te da las dos cosas a pocas cuadras.",["viacrucis","soleada"]]}[gana];
+    $("#quiz").innerHTML=`<div class="barra-prog"><i style="width:100%"></i></div><h2 style="font-size:1.7rem">${R[0]}</h2><div class="medidor"><div style="width:${pm}%;background:#B8D435">${pm>14?"Montaña "+pm+"%":""}</div><div style="width:${pr}%;background:#3AAFB9">${pr>14?"Río "+pr+"%":""}</div></div><p style="font-size:1.08rem">${R[1]}</p><div class="opciones">${R[2].map(id=>`<a class="opcion" href="${comoLlegar(lugar(id).ll)}" target="_blank" rel="noopener">📍 Ir a ${lugar(id).n}</a>`).join("")}</div><div style="margin-top:18px"><button class="btn sec" id="otra">Hacerlo de nuevo</button></div>`;
+    $("#otra").onclick=()=>{i=0;pts={m:0,r:0};paso()};
+  };
+  paso();
+};
+
+/* --- Residente --- */
+V.residente = () => `<div class="envoltura vista">
+  ${cabecera("¿Sos residente y te quedaste con ganas de saber más?","Este video es para vos: lo que no sale en las guías, contado por la gente del lugar.")}
+  <div class="mapa-caja" style="aspect-ratio:16/9;max-width:100%;display:grid;place-items:center;text-align:center;padding:20px">
+    <!-- Reemplazá este bloque por tu video, por ejemplo:
+         <video src="video-residentes.mp4" controls poster="portada.jpg" style="width:100%;height:100%"></video> -->
+    <div><span class="btn" style="font-size:1.1rem;padding:16px 26px">${ICON.play} Video de residentes</span><p class="nota" style="margin-top:12px">Espacio para el video</p></div>
+  </div>
+  ${seguir("residente")}
+</div>`;
+
+/* --- Mapa en vivo --- */
+let mapa=null, capaYo=null, vigilancia=null, marcadores={};
+V.mapa = () => `<div class="envoltura vista">
+  ${cabecera("Mapa interactivo en vivo","Activá tu ubicación y te decimos qué tenés más cerca.")}
+  <div class="mapa-ctrl solo-js">
+    <button class="btn" id="btnYo">${ICON.pin} Mostrar dónde estoy</button>
+    ${Object.entries(TIPOS).map(([k,v])=>`<button class="chip" data-capa="${k}" aria-pressed="true" style="border-color:${v.c}">${v.n}</button>`).join("")}
+  </div>
+  <div class="mapa-caja"><div id="mapa" role="region" aria-label="Mapa de Santa Rosa"></div></div>
+  <p class="nota solo-js" id="cerca" style="margin-top:10px">Tocá un punto para ver la info y el botón “Cómo llegar”.</p>
+  <h2 class="subtitulo">Todos los lugares</h2>
+  <div class="grilla" id="listaLug">${LUGARES.map(l=>`<article class="card"><span class="pill" style="background:${TIPOS[l.t].c};color:#1D1D1B">${TIPOS[l.t].n}</span><h3>${l.n}</h3><p>${l.d}</p><div class="acciones"><a class="btn" href="${comoLlegar(l.ll)}" target="_blank" rel="noopener">Cómo llegar ${ICON.ruta}</a><button class="btn sec solo-js" data-volar="${l.id}">Ver en el mapa</button></div></article>`).join("")}</div>
+  ${seguir("mapa")}
+</div>`;
+V.mapa.despues = (foco) => {
+  if(typeof L==="undefined"){$("#mapa").outerHTML=`<div class="mapa-aviso">El mapa no pudo cargar. Revisá tu conexión.</div>`;return}
+  mapa=L.map("mapa",{scrollWheelZoom:false}).setView(CENTRO,14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(mapa);
+  marcadores={};
+  LUGARES.forEach(l=>{
+    const tp=TIPOS[l.t];
+    const ic=L.divIcon({className:"",html:`<div class="pin" style="background:${tp.c}"><span>${tp.l}</span></div>`,iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-30]});
+    marcadores[l.id]=L.marker(l.ll,{icon:ic}).addTo(mapa).bindPopup(`<b>${l.n}</b><br>${l.d}<br><a href="${comoLlegar(l.ll)}" target="_blank" rel="noopener">Cómo llegar →</a>`);
+    marcadores[l.id]._tipo=l.t;
+  });
+  document.querySelectorAll("[data-volar]").forEach(b=>b.onclick=()=>{volar(b.dataset.volar);$("#mapa").scrollIntoView({behavior:"smooth",block:"center"})});
+  document.querySelectorAll("[data-capa]").forEach(b=>b.onclick=()=>{
+    const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);
+    Object.values(marcadores).forEach(m=>{if(m._tipo===b.dataset.capa){on?m.addTo(mapa):m.remove()}});
+  });
+  $("#btnYo").onclick=ubicarme;
+  if(foco&&marcadores[foco]) setTimeout(()=>volar(foco),300);
+};
+function volar(id){const l=lugar(id);mapa.flyTo(l.ll,16,{duration:.8});marcadores[id].addTo(mapa).openPopup()}
+function distKm(a,b){const R=6371,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]);const h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function ubicarme(){
+  if(!navigator.geolocation){toast("Tu navegador no permite ubicación");return}
+  $("#btnYo").textContent="Buscando tu ubicación…";
+  let primera=true;
+  vigilancia=navigator.geolocation.watchPosition(p=>{
+    if(!mapa) return;
+    const yo=[p.coords.latitude,p.coords.longitude];
+    if(!capaYo||!mapa.hasLayer(capaYo)){capaYo=L.marker(yo,{icon:L.divIcon({className:"",html:'<div class="yo"></div>',iconSize:[18,18]})}).addTo(mapa).bindPopup("Estás acá")}
+    else capaYo.setLatLng(yo);
+    if(primera){mapa.setView(yo,15);primera=false}
+    const cerca=LUGARES.map(l=>({l,d:distKm(yo,l.ll)})).sort((a,b)=>a.d-b.d)[0];
+    $("#cerca").innerHTML=`<b>En vivo:</b> lo más cercano es <b>${cerca.l.n}</b>, a ${cerca.d<1?Math.round(cerca.d*1000)+" m":cerca.d.toFixed(1)+" km"}. <a href="${comoLlegar(cerca.l.ll)}" target="_blank" rel="noopener">Ir →</a>`;
+    $("#btnYo").textContent="📍 Siguiéndote en vivo";
+  },()=>{$("#btnYo").textContent="📍 Mostrar dónde estoy";toast("No pudimos acceder a tu ubicación. Revisá los permisos.")},{enableHighAccuracy:true});
+}
+
+/* ============ BUSCADOR ============ */
+const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+let INDICE=[];
+function construirIndice(){
+  const KW={rio:"agua pileta nadar balneario playa",montana:"cerro sierra caminar trekking mirador",historia:"historia museo antiguo",comida:"comer restaurante cena almuerzo",servicio:"informes turismo oficina"};
+  INDICE=[
+    ...LUGARES.map(l=>({t:l.n,d:l.d,tipo:TIPOS[l.t].n,ir:["mapa",l.id],kw:KW[l.t]})),
+    ...ACTIV.map(a=>({t:a.n,d:a.d,tipo:"Plan",ir:["divertirme",null,{filtro:a.t}],kw:"hacer actividad divertirme"})),
+    ...HOSP.map(h=>({t:h.n,d:h.tl+" · ★ "+h.r,tipo:"Dormir",ir:["hospedajes",null,{fh:h.t}],kw:"dormir alojamiento hospedaje cabaña cabana hotel posada hostel departamento camping "+h.d})),
+    ...PICAR.map(p=>({t:p.n,d:p.tl+" · ★ "+p.r,tipo:"Comer",ir:["hospedajes",null,{cat:p.cat}],kw:"comer restaurante comida cena almuerzo picar "+p.d})),
+    ...AGENDA.map(e=>({t:e.n,d:e.f+" · "+e.l,tipo:"Agenda",ir:["agenda"],kw:"fiesta evento agenda festival "+e.d})),
+    ...CONTACTOS.map(c=>({t:c.n,d:c.dir+" · "+c.tel,tipo:"Contacto",ir:["contacto"],kw:"telefono contacto oficina llamar whatsapp"})),
+    {t:"Cómo llegar a Santa Rosa",d:"Desde Córdoba (96 km) y Buenos Aires",tipo:"Viaje",ir:["tips"],kw:"como llegar ruta colectivo auto viaje distancia"},
+    {t:"Teléfonos de emergencia",d:"Policía 101 · Salud 107 · Bomberos 100 · Hospital",tipo:"Urgente",ir:["contacto"],kw:"emergencia hospital policia bomberos ambulancia urgencia medico"},
+    {t:"Calculá tu presupuesto",d:"Personas, noches y tipo de viaje",tipo:"Herramienta",ir:["hospedajes"],kw:"presupuesto precio cuanto cuesta gastar plata"},
+    {t:"Clima y pronóstico",d:"El tiempo de hoy y los próximos días",tipo:"Clima",ir:["tips"],kw:"clima tiempo lluvia temperatura pronostico"},
+    {t:"Test: ¿montaña o río?",d:"5 preguntas para saber qué te va",tipo:"Test",ir:["team"],kw:"quiz test juego"},
+    ...PREGUNTAS.map(p=>({t:p.q,d:"",tipo:"Sección",ir:[p.id],kw:""}))
+  ].map(x=>({...x,txt:norm(x.t+" "+x.d+" "+(x.kw||""))}));
+}
+function iniciarBuscador(){
+  const inp=$("#buscar"), ul=$("#resultados"); if(!inp) return;
+  let actuales=[];
+  const abrir=r=>ir(r.ir[0],r.ir[1],r.ir[2]);
+  const mostrar=()=>{
+    const q=norm(inp.value.trim()); if(q.length<2){ul.hidden=true;return}
+    const palabras=q.split(/\s+/);
+    actuales=INDICE.filter(x=>palabras.every(w=>x.txt.includes(w))).slice(0,7);
+    ul.innerHTML=actuales.length?actuales.map((r,i)=>`<li><button data-res="${i}"><span class="tipo">${r.tipo}</span><span><b>${r.t}</b>${r.d?`<small>${r.d}</small>`:""}</span></button></li>`).join(""):`<li style="padding:12px">No encontramos eso. Probá con otra palabra o <a href="#contacto" data-ir="contacto">preguntale a Turismo</a>.</li>`;
+    ul.hidden=false;
+    ul.querySelectorAll("[data-res]").forEach(b=>b.onclick=()=>abrir(actuales[+b.dataset.res]));
+  };
+  inp.oninput=mostrar;
+  inp.onkeydown=e=>{if(e.key==="Enter"&&actuales[0]){e.preventDefault();abrir(actuales[0])}if(e.key==="Escape")ul.hidden=true};
+  document.querySelectorAll("[data-sug]").forEach(b=>b.onclick=()=>{inp.value=b.dataset.sug;mostrar();inp.focus()});
+}
+document.addEventListener("click",e=>{const ul=$("#resultados");if(ul&&!e.target.closest(".buscador"))ul.hidden=true});
+$("#btnBuscar").onclick=()=>{
+  if(vistaActual!=="inicio") ir("inicio");
+  setTimeout(()=>{const i=$("#buscar");if(i){i.scrollIntoView({behavior:"smooth",block:"center"});i.focus({preventScroll:true})}},60);
+};
+
+/* ============ NAVEGACIÓN ============ */
+let vistaActual="inicio";
+function ir(id,foco,opts,apilar=true){
+  if(!V[id]) id="inicio";
+  if(mapa){mapa.remove();mapa=null;capaYo=null}
+  if(vigilancia!==null){navigator.geolocation.clearWatch(vigilancia);vigilancia=null}
+  vistaActual=id;
+  app.innerHTML=(id==="inicio"?"":'<div class="banda" aria-hidden="true"></div>')+V[id]();
+  if(V[id].despues) V[id].despues(foco,opts||{});
+  document.querySelectorAll(".tabbar a,.nav a").forEach(a=>{if(a.dataset.ir===id)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  try{ if(apilar) history.pushState({id},"","#"+id); }catch(e){}
+  window.scrollTo({top:0,behavior:"instant"});
+  if(id!=="inicio"){const h=app.querySelector("h1");if(h){h.setAttribute("tabindex","-1");h.focus({preventScroll:true})}}
+}
+window.addEventListener("popstate",()=>ir((location.hash||"#inicio").slice(1),null,{},false));
+document.addEventListener("click",e=>{
+  const c=e.target.closest("[data-copiar]");if(c){copiar(c.dataset.copiar);return}
+  const b=e.target.closest("[data-ir]");if(!b) return;
+  e.preventDefault();
+  const opts={};
+  if(b.dataset.filtroIr) opts.filtro=b.dataset.filtroIr;
+  if(b.dataset.planIr) opts.plan=+b.dataset.planIr;
+  ir(b.dataset.ir,b.dataset.foco,opts);
+});
+construirIndice();
+ir((location.hash||"#inicio").slice(1),null,{},false);
+</script>
+</body>
+</html>
