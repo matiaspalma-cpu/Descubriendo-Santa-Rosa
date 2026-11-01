@@ -64,7 +64,4 @@ Los precios son de referencia y las coordenadas del mapa son aproximadas.
 
 ## Créditos
 
-- **Diseño y desarrollo:** Matias Palma, Tecnicatura en Diseño Gráfico.
-- **Materia / docente:** [completar]
-- **Ilustración:** [completar autor/a]
 - El isologo de Santa Rosa de Calamuchita pertenece a la Municipalidad de Santa Rosa de Calamuchita. Se usa con fines académicos.
