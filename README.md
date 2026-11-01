@@ -2,7 +2,7 @@
 
 Guía turística interactiva de **Santa Rosa de Calamuchita** (Córdoba, Argentina), pensada para que cualquier persona, de cualquier edad, encuentre lo que busca con uno o dos toques.
 
-🔗 **Ver el sitio:** https://TU-USUARIO.github.io/descubriendo-santa-rosa/
+🔗 **Ver el sitio:** https://matiaspalma-cpu.github.io/Descubriendo-Santa-Rosa/
 
 ![Portada del sitio](img/fondo.jpg)
 
